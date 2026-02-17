@@ -126,7 +126,7 @@ export default function FloatingWriteButton() {
         top: position.y,
         touchAction: "none",
         zIndex: 50,
-        animation: shaking ? "fab-shake 0.3s ease-in-out infinite" : "none",
+        animation: shaking ? "fab-sway 2s ease-in-out infinite" : "none",
       }}
       className={`flex items-center gap-2 rounded-full ${bgColor} px-6 py-3 text-sm font-semibold text-white shadow-lg cursor-grab active:cursor-grabbing select-none transition-colors focus:outline-none`}
     >
