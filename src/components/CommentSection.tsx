@@ -68,6 +68,7 @@ export default function CommentSection({
       }
 
       setContent("");
+      window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: false } }));
       await fetchComments();
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
@@ -149,6 +150,7 @@ export default function CommentSection({
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onFocus={() => window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: true } }))}
             placeholder="댓글을 작성하세요..."
             rows={2}
             className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-2 py-1 text-xs text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y leading-tight"
@@ -227,6 +229,7 @@ function CommentItem({
       await onReply(comment.id, replyContent);
       setReplyContent("");
       setShowReplyForm(false);
+      window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: false } }));
     } catch {
       // error handled in parent
     } finally {
@@ -263,7 +266,11 @@ function CommentItem({
           <div className="flex items-center gap-1">
             {currentUserId && (
               <button
-                onClick={() => setShowReplyForm(!showReplyForm)}
+                onClick={() => {
+                  const next = !showReplyForm;
+                  setShowReplyForm(next);
+                  window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: next } }));
+                }}
                 className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition"
               >
                 {showReplyForm ? "취소" : "답글"}

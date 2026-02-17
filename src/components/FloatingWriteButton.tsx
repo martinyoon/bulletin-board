@@ -11,28 +11,71 @@ export default function FloatingWriteButton() {
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [initialized, setInitialized] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [shaking, setShaking] = useState(false);
   const isDragging = useRef(false);
   const wasDragged = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
-  const btnRef = useRef<HTMLDivElement>(null);
+  const positionRef = useRef({ x: 0, y: 0 });
+  const hiddenRef = useRef(false);
+
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+
+  useEffect(() => {
+    hiddenRef.current = hidden;
+  }, [hidden]);
 
   useEffect(() => {
     const saved = localStorage.getItem("fab-position");
     if (saved) {
       const parsed = JSON.parse(saved);
       setPosition({ x: parsed.x, y: parsed.y });
+      positionRef.current = { x: parsed.x, y: parsed.y };
     } else {
-      setPosition({ x: window.innerWidth - 160, y: window.innerHeight - 80 });
+      const init = { x: window.innerWidth - 160, y: window.innerHeight - 80 };
+      setPosition(init);
+      positionRef.current = init;
     }
     setInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setHidden(detail?.open === true);
+    };
+    window.addEventListener("comment-form-toggle", handler);
+    return () => window.removeEventListener("comment-form-toggle", handler);
+  }, []);
+
+  useEffect(() => {
+    let shakingNow = false;
+    const onMouseMove = (e: MouseEvent) => {
+      if (isDragging.current || hiddenRef.current) return;
+      const pos = positionRef.current;
+      const cx = pos.x + 65;
+      const cy = pos.y + 22;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const near = dx * dx + dy * dy < 176400; // 420px squared
+      if (near !== shakingNow) {
+        shakingNow = near;
+        setShaking(near);
+      }
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     isDragging.current = true;
     wasDragged.current = false;
-    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+    setShaking(false);
+    dragStart.current = { x: e.clientX - positionRef.current.x, y: e.clientY - positionRef.current.y };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, [position]);
+  }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
@@ -44,8 +87,8 @@ export default function FloatingWriteButton() {
 
   const handlePointerUp = useCallback(() => {
     isDragging.current = false;
-    localStorage.setItem("fab-position", JSON.stringify(position));
-  }, [position]);
+    localStorage.setItem("fab-position", JSON.stringify(positionRef.current));
+  }, []);
 
   const handleClick = useCallback(() => {
     if (wasDragged.current) return;
@@ -61,7 +104,7 @@ export default function FloatingWriteButton() {
     }
   }, [pathname, router]);
 
-  if (!session?.user || !initialized) return null;
+  if (!session?.user || !initialized || hidden) return null;
 
   const isNewPostPage = pathname === "/posts/new";
   const isEditPostPage = pathname.match(/^\/posts\/[^/]+\/edit$/);
@@ -73,13 +116,19 @@ export default function FloatingWriteButton() {
 
   return (
     <div
-      ref={btnRef}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onClick={handleClick}
-      style={{ left: position.x, top: position.y, touchAction: "none" }}
-      className={`fixed z-50 flex items-center gap-2 rounded-full ${bgColor} px-6 py-3 text-sm font-semibold text-white shadow-lg cursor-grab active:cursor-grabbing select-none transition-colors focus:outline-none`}
+      style={{
+        position: "fixed",
+        left: position.x,
+        top: position.y,
+        touchAction: "none",
+        zIndex: 50,
+        animation: shaking ? "fab-shake 0.3s ease-in-out infinite" : "none",
+      }}
+      className={`flex items-center gap-2 rounded-full ${bgColor} px-6 py-3 text-sm font-semibold text-white shadow-lg cursor-grab active:cursor-grabbing select-none transition-colors focus:outline-none`}
     >
       <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
