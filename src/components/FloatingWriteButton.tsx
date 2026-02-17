@@ -1,0 +1,90 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useRef, useCallback, useEffect } from "react";
+
+export default function FloatingWriteButton() {
+  const { data: session } = useSession();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [initialized, setInitialized] = useState(false);
+  const isDragging = useRef(false);
+  const wasDragged = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const btnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("fab-position");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setPosition({ x: parsed.x, y: parsed.y });
+    } else {
+      setPosition({ x: window.innerWidth - 160, y: window.innerHeight - 80 });
+    }
+    setInitialized(true);
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isDragging.current = true;
+    wasDragged.current = false;
+    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [position]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    wasDragged.current = true;
+    const newX = Math.max(0, Math.min(window.innerWidth - 150, e.clientX - dragStart.current.x));
+    const newY = Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragStart.current.y));
+    setPosition({ x: newX, y: newY });
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    isDragging.current = false;
+    localStorage.setItem("fab-position", JSON.stringify(position));
+  }, [position]);
+
+  const handleClick = useCallback(() => {
+    if (wasDragged.current) return;
+
+    const isNewPostPage = pathname === "/posts/new";
+    const isEditPostPage = pathname.match(/^\/posts\/[^/]+\/edit$/);
+
+    if (isNewPostPage || isEditPostPage) {
+      const form = document.getElementById("post-form") as HTMLFormElement;
+      if (form) form.requestSubmit();
+    } else {
+      router.push("/posts/new");
+    }
+  }, [pathname, router]);
+
+  if (!session?.user || !initialized) return null;
+
+  const isNewPostPage = pathname === "/posts/new";
+  const isEditPostPage = pathname.match(/^\/posts\/[^/]+\/edit$/);
+  const isFormPage = isNewPostPage || isEditPostPage;
+
+  const bgColor = isFormPage ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700";
+  const label = isFormPage ? (isNewPostPage ? "작성 완료" : "수정 완료") : "새글 쓰기";
+  const iconPath = isFormPage ? "M5 13l4 4L19 7" : "M12 4v16m8-8H4";
+
+  return (
+    <div
+      ref={btnRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onClick={handleClick}
+      style={{ left: position.x, top: position.y, touchAction: "none" }}
+      className={`fixed z-50 flex items-center gap-2 rounded-full ${bgColor} px-6 py-3 text-sm font-semibold text-white shadow-lg cursor-grab active:cursor-grabbing select-none transition-colors focus:outline-none`}
+    >
+      <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
+      </svg>
+      {label}
+    </div>
+  );
+}

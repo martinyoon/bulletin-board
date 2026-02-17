@@ -63,7 +63,7 @@ export default function PostForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-1">
+    <form id="post-form" onSubmit={handleSubmit} className="space-y-1">
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 p-1 text-xs text-red-600 dark:text-red-400 border-b border-red-200 dark:border-red-800 leading-tight">
           {error}
@@ -107,17 +107,6 @@ export default function PostForm({
       </div>
 
       <div className="flex items-center gap-1">
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading
-            ? "저장 중..."
-            : mode === "create"
-              ? "작성하기"
-              : "수정하기"}
-        </button>
         <button
           type="button"
           onClick={() => router.back()}

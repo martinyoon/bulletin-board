@@ -4,6 +4,7 @@ import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import Header from "@/components/Header";
+import FloatingWriteButton from "@/components/FloatingWriteButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <ThemeProvider>
             <Header />
             <main>{children}</main>
+            <FloatingWriteButton />
           </ThemeProvider>
         </SessionProvider>
       </body>

@@ -52,16 +52,8 @@ export default async function PostListPage({
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Header */}
-        <div className="flex items-center justify-between mb-1">
+        <div className="mb-1">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">세상의모든것-댓글달기-게시판</h1>
-          {session?.user && (
-            <Link
-              href="/posts/new"
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 transition focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-            >
-              새 글 작성
-            </Link>
-          )}
         </div>
 
         {/* Search bar */}
@@ -91,14 +83,6 @@ export default async function PostListPage({
                 ? `"${searchQuery}"에 대한 검색 결과가 없습니다.`
                 : "아직 게시글이 없습니다."}
             </p>
-            {session?.user && !searchQuery && (
-              <Link
-                href="/posts/new"
-                className="mt-1 inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                첫 게시글을 작성해보세요!
-              </Link>
-            )}
           </div>
         ) : (
           <div className="space-y-0">
