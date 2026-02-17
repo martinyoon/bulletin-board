@@ -13,9 +13,10 @@ export default function Header() {
       <div className="max-w-5xl mx-auto px-2 h-10 flex items-center justify-between">
         <Link
           href="/posts"
-          className="text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition"
+          style={{ backgroundColor: "#044f4f", color: "#b2dfdb", border: "1px solid #066060" }}
+          className="text-lg font-bold flex-1 text-center px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-80"
         >
-          세상의모든것-댓글달기-게시판
+          세상의모든것-댓글달기-게시판 리스트
         </Link>
 
         <nav className="flex items-center gap-2">
