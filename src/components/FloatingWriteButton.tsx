@@ -59,7 +59,7 @@ export default function FloatingWriteButton() {
       const cy = pos.y + 22;
       const dx = e.clientX - cx;
       const dy = e.clientY - cy;
-      const near = dx * dx + dy * dy < 176400; // 420px squared
+      const near = dx * dx + dy * dy < 6400; // 80px squared
       if (near !== shakingNow) {
         shakingNow = near;
         setShaking(near);
