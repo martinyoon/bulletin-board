@@ -11,13 +11,27 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-5xl mx-auto px-2 h-10 flex items-center justify-between">
-        <Link
-          href="/posts"
-          style={{ backgroundColor: "#044f4f", color: "#b2dfdb", border: "1px solid #066060" }}
-          className="text-lg font-bold flex-1 text-center px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-80"
-        >
-          세상의모든것-댓글달기-게시판 리스트
-        </Link>
+        <div className="flex gap-1.5">
+          <Link
+            href="/posts/super-best"
+            className="text-lg font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-80 bg-orange-500 text-white border border-orange-600 hover:bg-orange-600"
+          >
+            슈퍼베스트
+          </Link>
+          <Link
+            href="/posts/best"
+            className="text-lg font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-80 bg-yellow-500 text-white border border-yellow-600 hover:bg-yellow-600"
+          >
+            베스트글
+          </Link>
+          <Link
+            href="/posts"
+            style={{ backgroundColor: "#044f4f", color: "#b2dfdb", border: "1px solid #066060" }}
+            className="text-lg font-bold flex-1 text-center px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-80"
+          >
+            게시판
+          </Link>
+        </div>
 
         <nav className="flex items-center gap-2">
           {/* Dark mode toggle */}
