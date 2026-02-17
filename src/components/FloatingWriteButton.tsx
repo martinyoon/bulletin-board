@@ -28,17 +28,35 @@ export default function FloatingWriteButton() {
   }, [hidden]);
 
   useEffect(() => {
+    const clamp = (x: number, y: number) => ({
+      x: Math.max(0, Math.min(x, window.innerWidth - 150)),
+      y: Math.max(0, Math.min(y, window.innerHeight - 50)),
+    });
+
     const saved = localStorage.getItem("fab-position");
     if (saved) {
       const parsed = JSON.parse(saved);
-      setPosition({ x: parsed.x, y: parsed.y });
-      positionRef.current = { x: parsed.x, y: parsed.y };
+      const clamped = clamp(parsed.x, parsed.y);
+      setPosition(clamped);
+      positionRef.current = clamped;
     } else {
-      const init = { x: window.innerWidth - 160, y: window.innerHeight - 80 };
+      const init = clamp(window.innerWidth - 160, window.innerHeight - 80);
       setPosition(init);
       positionRef.current = init;
     }
     setInitialized(true);
+
+    const onResize = () => {
+      const pos = positionRef.current;
+      const clamped = clamp(pos.x, pos.y);
+      if (clamped.x !== pos.x || clamped.y !== pos.y) {
+        setPosition(clamped);
+        positionRef.current = clamped;
+        localStorage.setItem("fab-position", JSON.stringify(clamped));
+      }
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   useEffect(() => {
@@ -79,6 +97,9 @@ export default function FloatingWriteButton() {
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
+    const dx = e.clientX - dragStart.current.x - positionRef.current.x;
+    const dy = e.clientY - dragStart.current.y - positionRef.current.y;
+    if (!wasDragged.current && dx * dx + dy * dy < 25) return; // 5px threshold
     wasDragged.current = true;
     const newX = Math.max(0, Math.min(window.innerWidth - 150, e.clientX - dragStart.current.x));
     const newY = Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragStart.current.y));
