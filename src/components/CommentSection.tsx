@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface Comment {
   id: string;
@@ -135,6 +135,7 @@ export default function CommentSection({
             <CommentItem
               key={comment.id}
               comment={comment}
+              postId={postId}
               currentUserId={currentUserId}
               onReply={handleReply}
               onDelete={handleDelete}
@@ -181,14 +182,23 @@ export default function CommentSection({
 
 /* ─── 개별 댓글 컴포넌트 (재귀) ─── */
 
+interface Particle {
+  id: number;
+  emoji: string;
+  angle: number;
+  dist: number;
+}
+
 function CommentItem({
   comment,
+  postId,
   currentUserId,
   onReply,
   onDelete,
   depth,
 }: {
   comment: Comment;
+  postId: string;
   currentUserId?: string;
   onReply: (parentId: string, content: string) => Promise<void>;
   onDelete: (commentId: string) => Promise<void>;
@@ -198,6 +208,16 @@ function CommentItem({
   const [replyContent, setReplyContent] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // 추천/비추천 상태
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [dislikeCount, setDislikeCount] = useState(0);
+  const [isDisliked, setIsDisliked] = useState(false);
+  const [voteLoading, setVoteLoading] = useState(false);
+  const [likeParticles, setLikeParticles] = useState<Particle[]>([]);
+  const [dislikeParticles, setDislikeParticles] = useState<Particle[]>([]);
+  const particleId = useRef(0);
 
   // 깊이별 세로선 색상
   const borderColors = [
@@ -218,6 +238,129 @@ function CommentItem({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // 추천/비추천 상태 조회
+  useEffect(() => {
+    Promise.all([
+      fetch(`/api/posts/${postId}/comments/${comment.id}/like`).then((r) => r.json()),
+      fetch(`/api/posts/${postId}/comments/${comment.id}/dislike`).then((r) => r.json()),
+    ])
+      .then(([likeData, dislikeData]) => {
+        setLikeCount(likeData.likeCount);
+        setIsLiked(likeData.isLiked);
+        setDislikeCount(dislikeData.dislikeCount);
+        setIsDisliked(dislikeData.isDisliked);
+      })
+      .catch(() => {});
+  }, [postId, comment.id]);
+
+  const spawnLikeParticles = () => {
+    const emojis = ["❤️", "🌟", "✨", "🎉", "💖", "⭐", "💫", "🔥", "💕"];
+    const ps = Array.from({ length: 10 }, () => ({
+      id: particleId.current++,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+      angle: Math.random() * 360,
+      dist: 30 + Math.random() * 50,
+    }));
+    setLikeParticles(ps);
+    setTimeout(() => setLikeParticles([]), 1000);
+  };
+
+  const spawnDislikeParticles = () => {
+    const emojis = ["🖤", "💀", "☠️", "⚫", "🌑", "♠️", "⬛", "🪦", "⛓️"];
+    const ps = Array.from({ length: 10 }, () => ({
+      id: particleId.current++,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+      angle: Math.random() * 360,
+      dist: 30 + Math.random() * 50,
+    }));
+    setDislikeParticles(ps);
+    setTimeout(() => setDislikeParticles([]), 1000);
+  };
+
+  const handleLike = async () => {
+    if (!currentUserId) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    if (voteLoading) return;
+    setVoteLoading(true);
+
+    if (!isLiked) spawnLikeParticles();
+    const prevLiked = isLiked;
+    const prevCount = likeCount;
+    setIsLiked(!isLiked);
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+    if (!isLiked && isDisliked) {
+      setIsDisliked(false);
+      setDislikeCount(dislikeCount - 1);
+    }
+
+    try {
+      const res = await fetch(`/api/posts/${postId}/comments/${comment.id}/like`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setLikeCount(data.likeCount);
+        setIsLiked(data.isLiked);
+        const dRes = await fetch(`/api/posts/${postId}/comments/${comment.id}/dislike`);
+        if (dRes.ok) {
+          const dData = await dRes.json();
+          setDislikeCount(dData.dislikeCount);
+          setIsDisliked(dData.isDisliked);
+        }
+      } else {
+        setIsLiked(prevLiked);
+        setLikeCount(prevCount);
+      }
+    } catch {
+      setIsLiked(prevLiked);
+      setLikeCount(prevCount);
+    } finally {
+      setVoteLoading(false);
+    }
+  };
+
+  const handleDislike = async () => {
+    if (!currentUserId) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    if (voteLoading) return;
+    setVoteLoading(true);
+
+    if (!isDisliked) spawnDislikeParticles();
+    const prevDisliked = isDisliked;
+    const prevCount = dislikeCount;
+    setIsDisliked(!isDisliked);
+    setDislikeCount(isDisliked ? dislikeCount - 1 : dislikeCount + 1);
+    if (!isDisliked && isLiked) {
+      setIsLiked(false);
+      setLikeCount(likeCount - 1);
+    }
+
+    try {
+      const res = await fetch(`/api/posts/${postId}/comments/${comment.id}/dislike`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setDislikeCount(data.dislikeCount);
+        setIsDisliked(data.isDisliked);
+        const lRes = await fetch(`/api/posts/${postId}/comments/${comment.id}/like`);
+        if (lRes.ok) {
+          const lData = await lRes.json();
+          setLikeCount(lData.likeCount);
+          setIsLiked(lData.isLiked);
+        }
+      } else {
+        setIsDisliked(prevDisliked);
+        setDislikeCount(prevCount);
+      }
+    } catch {
+      setIsDisliked(prevDisliked);
+      setDislikeCount(prevCount);
+    } finally {
+      setVoteLoading(false);
+    }
   };
 
   const handleReplySubmit = async (e: React.FormEvent) => {
@@ -245,6 +388,25 @@ function CommentItem({
       setDeletingId(null);
     }
   };
+
+  const renderParticles = (particles: Particle[]) =>
+    particles.map((p) => (
+      <span
+        key={p.id}
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          fontSize: "0.75rem",
+          pointerEvents: "none",
+          animation: "like-burst 0.8s ease-out forwards",
+          ["--angle" as string]: `${p.angle}deg`,
+          ["--dist" as string]: `${p.dist}px`,
+        }}
+      >
+        {p.emoji}
+      </span>
+    ));
 
   return (
     <div className={depth > 0 ? `ml-3 pl-2 border-l-2 ${borderColors[(depth - 1) % borderColors.length]}` : ""}>
@@ -304,6 +466,46 @@ function CommentItem({
             )
           )}
         </p>
+
+        {/* 댓글 추천/비추천 버튼 */}
+        <div className="flex items-center gap-1.5 mt-1">
+          <div className="relative">
+            <button
+              onClick={handleLike}
+              disabled={voteLoading}
+              className={`inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 ${
+                isLiked
+                  ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400"
+                  : "border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:text-red-400"
+              }`}
+            >
+              <svg className="h-3 w-3" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H6.633" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 21V10.5" />
+              </svg>
+              {likeCount}
+            </button>
+            {renderParticles(likeParticles)}
+          </div>
+          <div className="relative">
+            <button
+              onClick={handleDislike}
+              disabled={voteLoading}
+              className={`inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 ${
+                isDisliked
+                  ? "border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400"
+                  : "border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:text-blue-400"
+              }`}
+            >
+              <svg className="h-3 w-3" fill={isDisliked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.367 13.75c-.806 0-1.533.446-2.031 1.08a9.041 9.041 0 0 0-2.861 2.4c-.723.384-1.35.956-1.653 1.715a4.498 4.498 0 0 1-.322 1.672v.633a.75.75 0 0 0-.75.75 2.25 2.25 0 0 0-2.25-2.25c0-1.152.26-2.243.723-3.218.266-.558-.107-1.282-.725-1.282H3.372c-1.026 0-1.945-.694-2.054-1.715A11.95 11.95 0 0 1 1.25 12.25c0-2.848.992-5.464 2.649-7.521.388-.482.987-.729 1.605-.729h4.227c.483 0 .964.078 1.423.23l3.114 1.04c.459.153.94.23 1.423.23h2.27" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.25 3v10.5" />
+              </svg>
+              {dislikeCount}
+            </button>
+            {renderParticles(dislikeParticles)}
+          </div>
+        </div>
       </div>
 
       {/* Reply form */}
@@ -336,6 +538,7 @@ function CommentItem({
             <CommentItem
               key={reply.id}
               comment={reply}
+              postId={postId}
               currentUserId={currentUserId}
               onReply={onReply}
               onDelete={onDelete}

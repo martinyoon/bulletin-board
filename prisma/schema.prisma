@@ -13,10 +13,12 @@ model User {
   name      String
   password  String
   createdAt DateTime  @default(now())
-  posts     Post[]
-  comments  Comment[]
-  likes     Like[]
-  dislikes  Dislike[]
+  posts           Post[]
+  comments        Comment[]
+  likes           Like[]
+  dislikes        Dislike[]
+  commentLikes    CommentLike[]
+  commentDislikes CommentDislike[]
 }
 
 model Post {
@@ -55,14 +57,38 @@ model Dislike {
 }
 
 model Comment {
-  id        String    @id @default(cuid())
+  id        String           @id @default(cuid())
   content   String
-  createdAt DateTime  @default(now())
+  createdAt DateTime         @default(now())
   postId    String
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId  String
-  author    User      @relation(fields: [authorId], references: [id])
+  author    User             @relation(fields: [authorId], references: [id])
   parentId  String?
-  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   Comment[] @relation("CommentReplies")
+  parent    Comment?         @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]        @relation("CommentReplies")
+  likes     CommentLike[]
+  dislikes  CommentDislike[]
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId])
+}
+
+model CommentDislike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId])
 }
