@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Comment {
   id: string;
@@ -23,6 +25,7 @@ export default function CommentSection({
   postId,
   currentUserId,
 }: CommentSectionProps) {
+  const router = useRouter();
   const [comments, setComments] = useState<Comment[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [content, setContent] = useState("");
@@ -70,6 +73,7 @@ export default function CommentSection({
       setContent("");
       window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: false } }));
       await fetchComments();
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
     } finally {
@@ -90,6 +94,7 @@ export default function CommentSection({
     }
 
     await fetchComments();
+    router.refresh();
   };
 
   const handleDelete = async (commentId: string) => {
@@ -107,6 +112,7 @@ export default function CommentSection({
       }
 
       await fetchComments();
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
     }
@@ -197,6 +203,8 @@ function CommentItem({
   onReply,
   onDelete,
   depth,
+  parentAuthorName,
+  parentAuthorId,
 }: {
   comment: Comment;
   postId: string;
@@ -204,6 +212,8 @@ function CommentItem({
   onReply: (parentId: string, content: string) => Promise<void>;
   onDelete: (commentId: string) => Promise<void>;
   depth: number;
+  parentAuthorName?: string;
+  parentAuthorId?: string;
 }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
@@ -419,9 +429,9 @@ function CommentItem({
                 {"↳"}
               </span>
             )}
-            <span style={{ color: "#E5E7EB" }} className="text-xs font-semibold leading-tight">
+            <Link href={`/users/${comment.author.id}`} style={{ color: "#E5E7EB" }} className="text-xs font-semibold leading-tight hover:text-blue-400 hover:underline">
               {comment.author.name}
-            </span>
+            </Link>
             <span style={{ color: "#64748B" }} className="text-[11px] leading-tight">
               {formatDate(comment.createdAt)}
             </span>
@@ -453,6 +463,9 @@ function CommentItem({
           </div>
         </div>
         <p style={{ color: "#CBD5E1" }} className="text-xs whitespace-pre-wrap leading-tight">
+          {depth > 0 && parentAuthorName && parentAuthorId && (
+            <Link href={`/users/${parentAuthorId}`} style={{ color: "#6366F1" }} className="font-semibold mr-1 hover:underline">@{parentAuthorName}</Link>
+          )}
           {comment.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
             /^https?:\/\//.test(part) ? (
               <a
@@ -542,6 +555,8 @@ function CommentItem({
               onReply={onReply}
               onDelete={onDelete}
               depth={depth + 1}
+              parentAuthorName={comment.author.name}
+              parentAuthorId={comment.author.id}
             />
           ))}
         </div>

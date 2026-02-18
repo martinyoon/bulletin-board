@@ -46,7 +46,7 @@ export default async function PostDetailPage({
       id: true,
       title: true,
       createdAt: true,
-      author: { select: { name: true } },
+      author: { select: { id: true, name: true } },
       _count: { select: { comments: true, likes: true } },
     },
   });
@@ -112,7 +112,7 @@ export default async function PostDetailPage({
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  작성자: {post.author.name}
+                  작성자: <Link href={`/users/${post.author.id}`} style={{ color: "#60A5FA" }} className="hover:underline">{post.author.name}</Link>
                 </span>
                 <span className="flex items-center gap-1">
                   <svg

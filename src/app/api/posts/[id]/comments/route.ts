@@ -12,7 +12,7 @@ function buildReplyInclude(depth: number): object {
   return {
     author: { select: { id: true, name: true, email: true } },
     replies: {
-      orderBy: { createdAt: "asc" as const },
+      orderBy: { createdAt: "desc" as const },
       include: buildReplyInclude(depth - 1),
     },
   };

@@ -78,7 +78,7 @@ export default function ReadAwarePostList({ posts }: ReadAwarePostListProps) {
                     <span style={{ backgroundColor: "#3A3D44", color: "#CBD5E1" }} className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold">
                       {post.author.name[0]}
                     </span>
-                    {post.author.name}
+                    <Link href={`/users/${post.author.id}`} style={{ color: "#94A3B8" }} className="hover:text-blue-400 hover:underline" onClick={(e) => e.stopPropagation()}>{post.author.name}</Link>
                   </span>
                   <span>{formatRelativeTime(post.createdAt)}</span>
                   <span className="flex items-center gap-0.5">

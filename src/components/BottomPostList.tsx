@@ -7,7 +7,7 @@ interface PostItem {
   id: string;
   title: string;
   createdAt: string | Date;
-  author: { name: string };
+  author: { id: string; name: string };
   _count: { comments: number; likes: number };
 }
 
@@ -97,7 +97,7 @@ export default function BottomPostList({ posts, currentPostId, totalPages, curre
                   )}
                 </span>
                 <span style={{ color: "#64748B" }} className="flex items-center gap-1.5 text-xs ml-2 shrink-0">
-                  <span>{p.author.name}</span>
+                  <Link href={`/users/${p.author.id}`} style={{ color: "#64748B" }} className="hover:text-blue-400 hover:underline" onClick={(e) => e.stopPropagation()}>{p.author.name}</Link>
                   <span className="flex items-center gap-0.5">
                     <span className="text-[10px]">👍</span>
                     {p._count.likes}
