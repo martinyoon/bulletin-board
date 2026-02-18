@@ -45,7 +45,7 @@ export default async function PostListPage({
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Header */}
         <div className="mb-1">
-          <h1 style={{ color: "#E5E7EB" }} className="text-2xl font-bold leading-tight">세상의모든것-댓글달기-게시판</h1>
+          <h1 style={{ color: "#E5E7EB" }} className="text-2xl font-bold leading-tight">게시판 새글</h1>
         </div>
 
         {/* Search bar */}

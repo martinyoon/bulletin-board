@@ -17,6 +17,8 @@ interface BottomPostListProps {
   currentPostId: string;
   totalPages: number;
   currentPostPage: number;
+  paginationBase?: string;
+  postLinkSuffix?: string;
 }
 
 function formatRelativeTime(dateString: string | Date) {
@@ -55,7 +57,10 @@ function markAsRead(postId: string) {
   }
 }
 
-export default function BottomPostList({ posts, currentPostId, totalPages, currentPostPage }: BottomPostListProps) {
+export default function BottomPostList({ posts, currentPostId, totalPages, currentPostPage, paginationBase = "/posts", postLinkSuffix = "" }: BottomPostListProps) {
+  const listLabel = paginationBase === "/posts/super-best" ? "슈퍼베스트글"
+    : paginationBase === "/posts/best" ? "베스트글"
+    : "게시판 새글";
   const [readPosts, setReadPosts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -69,7 +74,7 @@ export default function BottomPostList({ posts, currentPostId, totalPages, curre
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
         </svg>
-        게시판 목록
+        {listLabel}
       </h3>
       <div className="space-y-0">
         {posts.map((p) => {
@@ -79,7 +84,7 @@ export default function BottomPostList({ posts, currentPostId, totalPages, curre
           return (
             <Link
               key={p.id}
-              href={`/posts/${p.id}`}
+              href={`/posts/${p.id}${postLinkSuffix}`}
               style={{ borderBottom: "1px solid #3A3D44" }}
               className={`block py-1.5 px-1.5 transition text-sm ${
                 isCurrent
@@ -120,7 +125,7 @@ export default function BottomPostList({ posts, currentPostId, totalPages, curre
           <div className="mt-1.5 flex items-center justify-center gap-1">
             {groupStart > 1 ? (
               <Link
-                href={`/posts?page=${groupStart - 1}`}
+                href={`${paginationBase}?page=${groupStart - 1}`}
                 style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
                 className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
               >
@@ -144,7 +149,7 @@ export default function BottomPostList({ posts, currentPostId, totalPages, curre
               ) : (
                 <Link
                   key={p}
-                  href={`/posts?page=${p}`}
+                  href={`${paginationBase}?page=${p}`}
                   style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
                   className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
                 >
@@ -155,7 +160,7 @@ export default function BottomPostList({ posts, currentPostId, totalPages, curre
 
             {groupEnd < totalPages ? (
               <Link
-                href={`/posts?page=${groupEnd + 1}`}
+                href={`${paginationBase}?page=${groupEnd + 1}`}
                 style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
                 className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
               >

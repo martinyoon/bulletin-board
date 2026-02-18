@@ -67,7 +67,7 @@ export default async function BestPostListPage({
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Header */}
         <div className="mb-1">
-          <h1 style={{ color: "#60A5FA" }} className="text-2xl font-bold leading-tight">베스트글 게시판</h1>
+          <h1 style={{ color: "#60A5FA" }} className="text-2xl font-bold leading-tight">베스트글</h1>
         </div>
 
         {/* Search bar */}
@@ -109,7 +109,7 @@ export default async function BestPostListPage({
             {posts.map((post) => (
               <Link
                 key={post.id}
-                href={`/posts/${post.id}`}
+                href={`/posts/${post.id}?from=best&page=${currentPage}`}
                 style={{ borderBottom: "1px solid #3A3D44" }}
                 className="block py-1.5 px-1 hover:bg-[#282B31] transition group relative border-l-4 border-l-transparent hover:border-l-blue-500"
               >

@@ -43,7 +43,7 @@ export default async function SuperBestPostListPage() {
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Header */}
         <div className="mb-1">
-          <h1 style={{ color: "#3B82F6" }} className="text-2xl font-bold leading-tight">슈퍼베스트글 게시판</h1>
+          <h1 style={{ color: "#3B82F6" }} className="text-2xl font-bold leading-tight">슈퍼베스트글</h1>
           <p style={{ color: "#94A3B8" }} className="text-sm leading-tight">추천을 가장 많이 받은 TOP 5</p>
         </div>
 
@@ -63,7 +63,7 @@ export default async function SuperBestPostListPage() {
               return (
                 <Link
                   key={post.id}
-                  href={`/posts/${post.id}`}
+                  href={`/posts/${post.id}?from=super-best`}
                   className="block py-1.5 px-1 transition group relative overflow-hidden"
                   style={{
                     borderBottom: "1px solid #3A3D44",

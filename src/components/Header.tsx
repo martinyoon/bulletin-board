@@ -12,9 +12,9 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
-    { href: "/posts/super-best", label: "슈퍼베스트" },
+    { href: "/posts/super-best", label: "슈퍼베스트글" },
     { href: "/posts/best", label: "베스트글" },
-    { href: "/posts", label: "게시판" },
+    { href: "/posts", label: "게시판 새글" },
   ];
 
   // 게시글 상세 페이지 여부 (/posts/[id] 또는 /posts/[id]/edit)
@@ -97,7 +97,7 @@ export default function Header() {
                   style={{ color: "#CBD5E1" }}
                   className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#3A3D44] transition"
                 >
-                  <span>🏆</span> 슈퍼베스트
+                  <span>🏆</span> 슈퍼베스트글
                 </Link>
                 <Link
                   href="/posts/best"
@@ -113,7 +113,7 @@ export default function Header() {
                   style={{ color: "#CBD5E1" }}
                   className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#3A3D44] transition"
                 >
-                  <span>📋</span> 게시판
+                  <span>📋</span> 게시판 새글
                 </Link>
                 <div style={{ borderColor: "#3A3D44" }} className="border-t my-1" />
                 <Link

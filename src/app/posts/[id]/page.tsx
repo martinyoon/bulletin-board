@@ -10,10 +10,13 @@ import BottomPostList from "@/components/BottomPostList";
 
 export default async function PostDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string; page?: string }>;
 }) {
   const { id } = await params;
+  const { from, page: listPage } = await searchParams;
   const session = await auth();
 
   const post = await prisma.post.findUnique({
@@ -27,29 +30,74 @@ export default async function PostDetailPage({
     notFound();
   }
 
-  // Fetch the exact page of posts that the current post belongs to
+  // Fetch bottom post list based on source
   const pageSize = 10;
+  const postSelect = {
+    id: true,
+    title: true,
+    createdAt: true,
+    author: { select: { id: true, name: true } },
+    _count: { select: { comments: true, likes: true } },
+  };
 
-  const [totalCount, newerCount] = await Promise.all([
-    prisma.post.count(),
-    prisma.post.count({ where: { createdAt: { gt: post.createdAt } } }),
-  ]);
+  let posts;
+  let totalPages: number;
+  let currentPostPage: number;
+  let paginationBase: string;
+  let postLinkSuffix: string;
 
-  const totalPages = Math.ceil(totalCount / pageSize);
-  const currentPostPage = Math.floor(newerCount / pageSize) + 1;
+  if (from === "super-best") {
+    // Super Best: top 5 by likes
+    posts = await prisma.post.findMany({
+      where: { likes: { some: {} } },
+      orderBy: { likes: { _count: "desc" as const } },
+      take: 5,
+      select: postSelect,
+    });
+    totalPages = 1;
+    currentPostPage = 1;
+    paginationBase = "/posts/super-best";
+    postLinkSuffix = "?from=super-best";
+  } else if (from === "best") {
+    // Best: paginated by likes
+    const bestPageNum = Math.max(1, parseInt(listPage || "1", 10));
+    const where = { likes: { some: {} } };
+    const [totalCount, bestPosts] = await Promise.all([
+      prisma.post.count({ where }),
+      prisma.post.findMany({
+        where,
+        skip: (bestPageNum - 1) * pageSize,
+        take: pageSize,
+        orderBy: { likes: { _count: "desc" as const } },
+        select: postSelect,
+      }),
+    ]);
+    posts = bestPosts;
+    totalPages = Math.ceil(totalCount / pageSize);
+    currentPostPage = bestPageNum;
+    paginationBase = "/posts/best";
+    postLinkSuffix = `?from=best&page=${bestPageNum}`;
+  } else {
+    // General board: find the page this post belongs to
+    const [totalCount, newerCount] = await Promise.all([
+      prisma.post.count(),
+      prisma.post.count({ where: { createdAt: { gt: post.createdAt } } }),
+    ]);
+    totalPages = Math.ceil(totalCount / pageSize);
+    currentPostPage = Math.floor(newerCount / pageSize) + 1;
+    posts = await prisma.post.findMany({
+      skip: (currentPostPage - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: "desc" },
+      select: postSelect,
+    });
+    paginationBase = "/posts";
+    postLinkSuffix = "";
+  }
 
-  const posts = await prisma.post.findMany({
-    skip: (currentPostPage - 1) * pageSize,
-    take: pageSize,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      createdAt: true,
-      author: { select: { id: true, name: true } },
-      _count: { select: { comments: true, likes: true } },
-    },
-  });
+  const backHref = from === "super-best" ? "/posts/super-best"
+    : from === "best" ? "/posts/best"
+    : "/posts";
 
   const isAuthor = session?.user?.id === post.author.id;
 
@@ -69,7 +117,7 @@ export default async function PostDetailPage({
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Back link */}
         <Link
-          href="/posts"
+          href={backHref}
           style={{ color: "#94A3B8" }}
           className="inline-flex items-center gap-1 text-sm hover:opacity-80 transition mb-1"
         >
@@ -168,7 +216,7 @@ export default async function PostDetailPage({
         </div>
 
         {/* Post list at bottom */}
-        <BottomPostList posts={JSON.parse(JSON.stringify(posts))} currentPostId={post.id} totalPages={totalPages} currentPostPage={currentPostPage} />
+        <BottomPostList posts={JSON.parse(JSON.stringify(posts))} currentPostId={post.id} totalPages={totalPages} currentPostPage={currentPostPage} paginationBase={paginationBase} postLinkSuffix={postLinkSuffix} />
       </div>
     </div>
   );
