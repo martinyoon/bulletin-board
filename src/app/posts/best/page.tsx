@@ -32,7 +32,7 @@ export default async function BestPostListPage({
 
   const currentPage = Math.max(1, parseInt(page || "1", 10));
   const pageSize = 10;
-  const searchQuery = search || "";
+  const searchQuery = (search || "").trim();
 
   const where = {
     likes: { some: {} },
@@ -90,18 +90,20 @@ export default async function BestPostListPage({
             </button>
           </div>
         </form>
+        <p style={{ color: "#64748B" }} className="text-xs mb-1 leading-tight">💡 ↑↓ 키로 이전 검색어를 불러올 수 있어요</p>
 
         {/* Post list */}
         {posts.length === 0 ? (
           <div className="py-8 text-center">
+            <style>{`@keyframes curious-wobble{0%,50%,100%{transform:translateY(0) rotate(0deg)}5%{transform:translateY(-14px) rotate(-8deg)}10%{transform:translateY(0) rotate(0deg)}15%{transform:translateY(-10px) rotate(6deg)}20%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-5px) rotate(-3deg)}30%{transform:translateY(0) rotate(0deg)}}`}</style>
             {searchQuery ? (
-              <img src="/curious-icon.jpg" alt="검색 결과 없음" width={80} height={80} className="mx-auto mb-2 rounded-full" />
+              <img src="/curious-icon.jpg" alt="검색 결과 없음" width={80} height={80} className="mx-auto mb-2 rounded-full" style={{ animation: "curious-wobble 3s ease-in-out infinite" }} />
             ) : (
               <div className="text-5xl mb-2">🔥</div>
             )}
             <p style={{ color: "#94A3B8" }} className="leading-tight">
               {searchQuery
-                ? `"${searchQuery}"에 대한 검색 결과가 없습니다.`
+                ? <>베스트글 중 <span style={{ color: "#60A5FA" }} className="font-bold">&ldquo;{searchQuery}&rdquo;</span>에 대한 검색 결과가 없습니다.</>
                 : "아직 베스트글이 없습니다!"}
             </p>
             {!searchQuery && (
