@@ -27,9 +27,28 @@ function getAvatarInitial(name: string) {
   return name[0];
 }
 
-export default async function SuperBestPostListPage() {
+export default async function SuperBestPostListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string }>;
+}) {
+  const { search } = await searchParams;
+  const searchQuery = search || "";
+
+  const where = {
+    likes: { some: {} },
+    ...(searchQuery
+      ? {
+          OR: [
+            { title: { contains: searchQuery } },
+            { content: { contains: searchQuery } },
+          ],
+        }
+      : {}),
+  };
+
   const posts = await prisma.post.findMany({
-    where: { likes: { some: {} } },
+    where,
     orderBy: { likes: { _count: "desc" as const } },
     take: 5,
     include: {
@@ -47,14 +66,43 @@ export default async function SuperBestPostListPage() {
           <p style={{ color: "#94A3B8" }} className="text-sm leading-tight">추천을 가장 많이 받은 TOP 5</p>
         </div>
 
+        {/* Search bar */}
+        <form method="GET" action="/posts/super-best" className="mb-1">
+          <div className="flex gap-1">
+            <input
+              type="text"
+              name="search"
+              defaultValue={searchQuery}
+              placeholder="슈퍼베스트글 검색..."
+              style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+              className="flex-1 rounded-lg border px-2 py-1.5 text-sm placeholder-[#64748B] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition leading-tight"
+            />
+            <button
+              type="submit"
+              style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+              className="rounded-lg border px-3 py-1.5 text-sm font-semibold hover:opacity-80 transition focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+            >
+              검색
+            </button>
+          </div>
+        </form>
+
         {/* Post list */}
         {posts.length === 0 ? (
           <div className="py-8 text-center">
-            <div className="text-5xl mb-2">🏆</div>
+            {searchQuery ? (
+              <img src="/curious-icon.jpg" alt="검색 결과 없음" width={80} height={80} className="mx-auto mb-2 rounded-full" />
+            ) : (
+              <img src="/curious-icon.jpg" alt="아직 없음" width={80} height={80} className="mx-auto mb-2 rounded-full" />
+            )}
             <p style={{ color: "#94A3B8" }} className="leading-tight">
-              아직 왕좌가 비어있습니다!
+              {searchQuery
+                ? `"${searchQuery}"에 대한 검색 결과가 없습니다.`
+                : "아직 왕좌가 비어있습니다!"}
             </p>
-            <p style={{ color: "#64748B" }} className="text-sm mt-0.5">추천을 1개 이상 받은 글이 여기에 표시됩니다.</p>
+            {!searchQuery && (
+              <p style={{ color: "#64748B" }} className="text-sm mt-0.5">추천을 1개 이상 받은 글이 여기에 표시됩니다.</p>
+            )}
           </div>
         ) : (
           <div className="space-y-0">

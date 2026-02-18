@@ -14,6 +14,7 @@ interface PostItem {
 
 interface ReadAwarePostListProps {
   posts: PostItem[];
+  currentPage?: number;
 }
 
 function formatRelativeTime(dateString: string | Date) {
@@ -39,7 +40,7 @@ function getReadPosts(): Set<string> {
   }
 }
 
-export default function ReadAwarePostList({ posts }: ReadAwarePostListProps) {
+export default function ReadAwarePostList({ posts, currentPage }: ReadAwarePostListProps) {
   const [readPosts, setReadPosts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function ReadAwarePostList({ posts }: ReadAwarePostListProps) {
         return (
           <Link
             key={post.id}
-            href={`/posts/${post.id}`}
+            href={`/posts/${post.id}${currentPage && currentPage > 1 ? `?page=${currentPage}` : ""}`}
             style={{ borderBottom: "1px solid #3A3D44" }}
             className="block py-1.5 px-1 hover:bg-[#282B31] transition group relative border-l-4 border-l-transparent hover:border-l-blue-500"
           >

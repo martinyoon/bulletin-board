@@ -95,9 +95,10 @@ export default async function PostDetailPage({
     postLinkSuffix = "";
   }
 
+  const pageSuffix = listPage && parseInt(listPage) > 1 ? `?page=${listPage}` : "";
   const backHref = from === "super-best" ? "/posts/super-best"
-    : from === "best" ? "/posts/best"
-    : "/posts";
+    : from === "best" ? `/posts/best${pageSuffix}`
+    : `/posts${pageSuffix}`;
 
   const isAuthor = session?.user?.id === post.author.id;
 

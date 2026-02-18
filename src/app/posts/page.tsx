@@ -72,7 +72,11 @@ export default async function PostListPage({
         {/* Post list */}
         {posts.length === 0 ? (
           <div className="py-8 text-center">
-            <div className="text-5xl mb-2">{searchQuery ? "🔍" : "📝"}</div>
+            {searchQuery ? (
+              <img src="/curious-icon.jpg" alt="검색 결과 없음" width={80} height={80} className="mx-auto mb-2 rounded-full" />
+            ) : (
+              <div className="text-5xl mb-2">📝</div>
+            )}
             <p style={{ color: "#94A3B8" }} className="leading-tight">
               {searchQuery
                 ? `"${searchQuery}"에 대한 검색 결과가 없습니다.`
@@ -80,7 +84,7 @@ export default async function PostListPage({
             </p>
           </div>
         ) : (
-          <ReadAwarePostList posts={JSON.parse(JSON.stringify(posts))} />
+          <ReadAwarePostList posts={JSON.parse(JSON.stringify(posts))} currentPage={currentPage} />
         )}
 
         {/* Pagination */}
