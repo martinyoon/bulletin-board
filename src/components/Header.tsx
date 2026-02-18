@@ -1,13 +1,26 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 
 export default function Header() {
+  const pathname = usePathname();
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const tabs = [
+    { href: "/posts/super-best", label: "슈퍼베스트" },
+    { href: "/posts/best", label: "베스트글" },
+    { href: "/posts", label: "게시판" },
+  ];
+
+  function isActive(href: string) {
+    if (href === "/posts") return pathname === "/posts" || (pathname.startsWith("/posts") && !pathname.startsWith("/posts/best") && !pathname.startsWith("/posts/super-best"));
+    return pathname.startsWith(href);
+  }
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -116,27 +129,29 @@ export default function Header() {
             )}
           </div>
 
-          <Link
-            href="/posts/super-best"
-            style={{ backgroundColor: "#3B82F6", color: "#FFFFFF", border: "1px solid #2563EB" }}
-            className="text-lg font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-90"
-          >
-            슈퍼베스트
-          </Link>
-          <Link
-            href="/posts/best"
-            style={{ backgroundColor: "#282B31", color: "#60A5FA", border: "1px solid #3A3D44" }}
-            className="text-lg font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-80"
-          >
-            베스트글
-          </Link>
-          <Link
-            href="/posts"
-            style={{ backgroundColor: "#282B31", color: "#E5E7EB", border: "1px solid #3A3D44" }}
-            className="text-lg font-bold flex-1 text-center px-4 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 hover:opacity-80"
-          >
-            게시판
-          </Link>
+          <div className="flex items-center overflow-x-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+            {tabs.map((tab) => {
+              const active = isActive(tab.href);
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className="relative whitespace-nowrap px-3 py-2 text-sm font-bold transition"
+                  style={{ color: active ? "#6366F1" : "#9CA3AF" }}
+                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = "#CBD5E1"; }}
+                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = "#9CA3AF"; }}
+                >
+                  {tab.label}
+                  {active && (
+                    <span
+                      className="absolute bottom-0 left-0 right-0"
+                      style={{ height: "3px", backgroundColor: "#6366F1", borderRadius: "2px 2px 0 0" }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         <nav className="flex items-center gap-2">
