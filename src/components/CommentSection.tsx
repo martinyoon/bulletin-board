@@ -219,6 +219,9 @@ function CommentItem({
   const [replyContent, setReplyContent] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [contentExpanded, setContentExpanded] = useState(false);
+  const [repliesExpanded, setRepliesExpanded] = useState(false);
+  const CONTENT_LIMIT = 150;
 
   // 추천/비추천 상태
   const [likeCount, setLikeCount] = useState(0);
@@ -383,6 +386,7 @@ function CommentItem({
       await onReply(comment.id, replyContent);
       setReplyContent("");
       setShowReplyForm(false);
+      setRepliesExpanded(true);
       window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: false } }));
     } catch {
       // error handled in parent
@@ -466,22 +470,40 @@ function CommentItem({
           {depth > 0 && parentAuthorName && parentAuthorId && (
             <Link href={`/users/${parentAuthorId}`} style={{ color: "#6366F1" }} className="font-semibold mr-1 hover:underline">@{parentAuthorName}</Link>
           )}
-          {comment.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-            /^https?:\/\//.test(part) ? (
-              <a
-                key={i}
-                href={part}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#60A5FA" }}
-                className="hover:underline break-all"
-              >
-                {part}
-              </a>
-            ) : (
-              part
-            )
-          )}
+          {(() => {
+            const text = comment.content;
+            const isLong = text.length > CONTENT_LIMIT;
+            const displayText = isLong && !contentExpanded ? text.slice(0, CONTENT_LIMIT) + "..." : text;
+            return (
+              <>
+                {displayText.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+                  /^https?:\/\//.test(part) ? (
+                    <a
+                      key={i}
+                      href={part}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#60A5FA" }}
+                      className="hover:underline break-all"
+                    >
+                      {part}
+                    </a>
+                  ) : (
+                    part
+                  )
+                )}
+                {isLong && (
+                  <button
+                    onClick={() => setContentExpanded(!contentExpanded)}
+                    style={{ color: "#60A5FA" }}
+                    className="ml-1 text-xs hover:underline"
+                  >
+                    {contentExpanded ? "접기" : "더보기"}
+                  </button>
+                )}
+              </>
+            );
+          })()}
         </p>
 
         {/* 댓글 추천/비추천 버튼 */}
@@ -544,23 +566,50 @@ function CommentItem({
       )}
 
       {/* Nested replies (recursive) */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-0.5 space-y-0">
-          {comment.replies.map((reply) => (
-            <CommentItem
-              key={reply.id}
-              comment={reply}
-              postId={postId}
-              currentUserId={currentUserId}
-              onReply={onReply}
-              onDelete={onDelete}
-              depth={depth + 1}
-              parentAuthorName={comment.author.name}
-              parentAuthorId={comment.author.id}
-            />
-          ))}
-        </div>
-      )}
+      {comment.replies && comment.replies.length > 0 && (() => {
+        const REPLIES_THRESHOLD = 3;
+        const shouldCollapse = comment.replies.length >= REPLIES_THRESHOLD && !repliesExpanded;
+        const visibleReplies = shouldCollapse ? [] : comment.replies;
+
+        return (
+          <div className="mt-0.5 space-y-0">
+            {shouldCollapse ? (
+              <button
+                onClick={() => setRepliesExpanded(true)}
+                style={{ color: "#60A5FA" }}
+                className="text-xs py-1 pl-3 hover:underline"
+              >
+                답글 {comment.replies.length}개 보기
+              </button>
+            ) : (
+              <>
+                {visibleReplies.map((reply) => (
+                  <CommentItem
+                    key={reply.id}
+                    comment={reply}
+                    postId={postId}
+                    currentUserId={currentUserId}
+                    onReply={onReply}
+                    onDelete={onDelete}
+                    depth={depth + 1}
+                    parentAuthorName={comment.author.name}
+                    parentAuthorId={comment.author.id}
+                  />
+                ))}
+                {comment.replies.length >= REPLIES_THRESHOLD && (
+                  <button
+                    onClick={() => setRepliesExpanded(false)}
+                    style={{ color: "#60A5FA" }}
+                    className="text-xs py-1 pl-3 hover:underline"
+                  >
+                    답글 접기
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

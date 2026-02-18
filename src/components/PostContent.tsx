@@ -11,6 +11,10 @@ export default function PostContent({ content }: PostContentProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [isOverflow, setIsOverflow] = useState(false);
+  const MAX_HEIGHT = 200;
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -74,26 +78,57 @@ export default function PostContent({ content }: PostContentProps) {
     return () => clearTimer();
   }, [clearTimer]);
 
+  useEffect(() => {
+    if (contentRef.current) {
+      setIsOverflow(contentRef.current.scrollHeight > MAX_HEIGHT);
+    }
+  }, [content]);
+
   return (
     <div ref={containerRef} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} className="relative">
-      <div style={{ color: "#CBD5E1" }} className="leading-tight whitespace-pre-wrap">
-        {content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-          /^https?:\/\//.test(part) ? (
-            <a
-              key={i}
-              href={part}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#60A5FA" }}
-              className="hover:underline break-all"
-            >
-              {part}
-            </a>
-          ) : (
-            part
-          )
+      <div className="relative">
+        <div
+          ref={contentRef}
+          style={{
+            color: "#CBD5E1",
+            maxHeight: isOverflow && !expanded ? `${MAX_HEIGHT}px` : "none",
+            overflow: isOverflow && !expanded ? "hidden" : "visible",
+          }}
+          className="leading-tight whitespace-pre-wrap"
+        >
+          {content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+            /^https?:\/\//.test(part) ? (
+              <a
+                key={i}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#60A5FA" }}
+                className="hover:underline break-all"
+              >
+                {part}
+              </a>
+            ) : (
+              part
+            )
+          )}
+        </div>
+        {isOverflow && !expanded && (
+          <div
+            style={{ background: "linear-gradient(transparent, #1F2126)" }}
+            className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
+          />
         )}
       </div>
+      {isOverflow && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{ color: "#60A5FA" }}
+          className="mt-1 text-sm hover:underline font-medium"
+        >
+          {expanded ? "본문 접기" : "전체 보기"}
+        </button>
+      )}
 
       {tooltip && (
         <div
