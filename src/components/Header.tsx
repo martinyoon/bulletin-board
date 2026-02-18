@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
@@ -74,13 +74,14 @@ export default function Header() {
       <div className="max-w-5xl mx-auto px-2 h-10 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           {/* Board Icon */}
-          <Link href="/posts">
-            <Image
+          <Link href="/posts" className="shrink-0">
+            <img
               src="/board-icon.jpg"
               alt="게시판"
-              width={28}
-              height={28}
+              width={32}
+              height={32}
               className="rounded-full"
+              style={{ border: "2px solid #3A3D44", objectFit: "cover" }}
             />
           </Link>
           {/* Menu Icon */}
