@@ -27,10 +27,21 @@ export default async function PostDetailPage({
     notFound();
   }
 
-  // Fetch post list for bottom section
+  // Fetch the exact page of posts that the current post belongs to
+  const pageSize = 10;
+
+  const [totalCount, newerCount] = await Promise.all([
+    prisma.post.count(),
+    prisma.post.count({ where: { createdAt: { gt: post.createdAt } } }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const currentPostPage = Math.floor(newerCount / pageSize) + 1;
+
   const posts = await prisma.post.findMany({
+    skip: (currentPostPage - 1) * pageSize,
+    take: pageSize,
     orderBy: { createdAt: "desc" },
-    take: 15,
     select: {
       id: true,
       title: true,
@@ -54,12 +65,13 @@ export default async function PostDetailPage({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div style={{ backgroundColor: "#1F2126" }} className="min-h-screen">
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Back link */}
         <Link
           href="/posts"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition mb-1"
+          style={{ color: "#94A3B8" }}
+          className="inline-flex items-center gap-1 text-sm hover:opacity-80 transition mb-1"
         >
           <svg
             className="h-4 w-4"
@@ -78,14 +90,14 @@ export default async function PostDetailPage({
         </Link>
 
         {/* Post content */}
-        <article className="bg-white dark:bg-gray-950 p-2">
+        <article style={{ backgroundColor: "#1F2126" }} className="p-2">
           {/* Post header */}
-          <div className="border-b border-gray-200 dark:border-gray-800 pb-1 mb-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1 leading-tight">
+          <div style={{ borderBottom: "1px solid #3A3D44" }} className="pb-1 mb-1">
+            <h1 style={{ color: "#E5E7EB" }} className="text-xl font-bold mb-1 leading-tight">
               {post.title}
             </h1>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 leading-tight">
+              <div style={{ color: "#94A3B8" }} className="flex items-center gap-1 text-sm leading-tight">
                 <span className="flex items-center gap-1">
                   <svg
                     className="h-4 w-4"
@@ -125,7 +137,8 @@ export default async function PostDetailPage({
                 <div className="flex items-center gap-1">
                   <Link
                     href={`/posts/${post.id}/edit`}
-                    className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition focus:ring-2 focus:ring-gray-200 focus:outline-none"
+                    style={{ borderColor: "#3A3D44", color: "#CBD5E1" }}
+                    className="rounded-lg border px-3 py-1.5 text-sm font-semibold hover:bg-[#282B31] transition focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                   >
                     수정
                   </Link>
@@ -136,18 +149,18 @@ export default async function PostDetailPage({
           </div>
 
           {/* Post body */}
-          <div className="prose prose-gray dark:prose-invert max-w-none">
+          <div className="prose prose-invert max-w-none">
             <PostContent content={post.content} />
           </div>
 
           {/* Like button */}
-          <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-800 flex justify-center">
+          <div style={{ borderTop: "1px solid #3A3D44" }} className="mt-1 pt-1 flex justify-center">
             <LikeButton postId={post.id} isLoggedIn={!!session?.user} />
           </div>
         </article>
 
         {/* Comments section */}
-        <div className="mt-1 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-2">
+        <div style={{ borderTop: "1px solid #3A3D44", backgroundColor: "#1F2126" }} className="mt-1 p-2">
           <CommentSection
             postId={post.id}
             currentUserId={session?.user?.id}
@@ -155,7 +168,7 @@ export default async function PostDetailPage({
         </div>
 
         {/* Post list at bottom */}
-        <BottomPostList posts={JSON.parse(JSON.stringify(posts))} currentPostId={post.id} />
+        <BottomPostList posts={JSON.parse(JSON.stringify(posts))} currentPostId={post.id} totalPages={totalPages} currentPostPage={currentPostPage} />
       </div>
     </div>
   );

@@ -76,7 +76,7 @@ export default function PostContent({ content }: PostContentProps) {
 
   return (
     <div ref={containerRef} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} className="relative">
-      <div className="text-gray-800 dark:text-gray-200 leading-tight whitespace-pre-wrap">
+      <div style={{ color: "#CBD5E1" }} className="leading-tight whitespace-pre-wrap">
         {content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
           /^https?:\/\//.test(part) ? (
             <a
@@ -84,7 +84,8 @@ export default function PostContent({ content }: PostContentProps) {
               href={part}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+              style={{ color: "#60A5FA" }}
+              className="hover:underline break-all"
             >
               {part}
             </a>
@@ -98,13 +99,13 @@ export default function PostContent({ content }: PostContentProps) {
         <div
           ref={tooltipRef}
           onClick={handleSearch}
-          style={{ position: "fixed", left: tooltip.x + 8, top: tooltip.y - 40, cursor: "pointer" }}
-          className="z-50 flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg px-5 py-3 animate-in fade-in hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+          style={{ position: "fixed", left: tooltip.x + 8, top: tooltip.y - 40, cursor: "pointer", backgroundColor: "#282B31", border: "1px solid #3A3D44" }}
+          className="z-50 flex items-center gap-3 rounded-xl shadow-lg px-5 py-3 animate-in fade-in hover:opacity-90 transition"
         >
-          <span className="text-sm text-gray-600 dark:text-gray-300 font-medium max-w-48 truncate">
+          <span style={{ color: "#CBD5E1" }} className="text-sm font-medium max-w-48 truncate">
             &ldquo;{tooltip.word}&rdquo;
           </span>
-          <span className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400">
+          <span style={{ color: "#60A5FA" }} className="flex items-center gap-1.5 text-sm font-semibold">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>

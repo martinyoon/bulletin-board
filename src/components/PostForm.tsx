@@ -65,7 +65,7 @@ export default function PostForm({
   return (
     <form id="post-form" onSubmit={handleSubmit} className="space-y-1">
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 p-1 text-xs text-red-600 dark:text-red-400 border-b border-red-200 dark:border-red-800 leading-tight">
+        <div style={{ backgroundColor: "rgba(239,68,68,0.1)", borderColor: "#7F1D1D", color: "#F87171" }} className="p-1 text-xs border-b leading-tight">
           {error}
         </div>
       )}
@@ -73,7 +73,8 @@ export default function PostForm({
       <div>
         <label
           htmlFor="title"
-          className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5 leading-tight"
+          style={{ color: "#CBD5E1" }}
+          className="block text-xs font-semibold mb-0.5 leading-tight"
         >
           제목
         </label>
@@ -83,7 +84,8 @@ export default function PostForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="제목을 입력하세요"
-          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-2 py-1 text-sm text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition"
+          style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+          className="w-full border px-2 py-1 text-sm placeholder-[#64748B] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition"
           disabled={loading}
         />
       </div>
@@ -91,7 +93,8 @@ export default function PostForm({
       <div>
         <label
           htmlFor="content"
-          className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5 leading-tight"
+          style={{ color: "#CBD5E1" }}
+          className="block text-xs font-semibold mb-0.5 leading-tight"
         >
           내용
         </label>
@@ -101,7 +104,8 @@ export default function PostForm({
           onChange={(e) => setContent(e.target.value)}
           placeholder="내용을 입력하세요"
           rows={12}
-          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-2 py-1 text-sm text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y"
+          style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+          className="w-full border px-2 py-1 text-sm placeholder-[#64748B] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y"
           disabled={loading}
         />
       </div>
@@ -111,7 +115,8 @@ export default function PostForm({
           type="button"
           onClick={() => router.back()}
           disabled={loading}
-          className="border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus:ring-2 focus:ring-gray-200 focus:outline-none transition disabled:opacity-50"
+          style={{ borderColor: "#3A3D44", color: "#CBD5E1" }}
+          className="border px-3 py-1.5 text-xs font-semibold hover:bg-[#282B31] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition disabled:opacity-50"
         >
           취소
         </button>

@@ -14,6 +14,8 @@ interface PostItem {
 interface BottomPostListProps {
   posts: PostItem[];
   currentPostId: string;
+  totalPages: number;
+  currentPostPage: number;
 }
 
 function formatRelativeTime(dateString: string | Date) {
@@ -52,7 +54,7 @@ function markAsRead(postId: string) {
   }
 }
 
-export default function BottomPostList({ posts, currentPostId }: BottomPostListProps) {
+export default function BottomPostList({ posts, currentPostId, totalPages, currentPostPage }: BottomPostListProps) {
   const [readPosts, setReadPosts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -61,8 +63,8 @@ export default function BottomPostList({ posts, currentPostId }: BottomPostListP
   }, [currentPostId]);
 
   return (
-    <div className="mt-2 border-t border-gray-200 dark:border-gray-800 pt-2">
-      <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
+    <div style={{ borderTop: "1px solid #3A3D44" }} className="mt-2 pt-2">
+      <h3 style={{ color: "#CBD5E1" }} className="text-sm font-bold mb-1 flex items-center gap-1">
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
         </svg>
@@ -77,35 +79,28 @@ export default function BottomPostList({ posts, currentPostId }: BottomPostListP
             <Link
               key={p.id}
               href={`/posts/${p.id}`}
-              className={`block border-b border-gray-100 dark:border-gray-800 py-1.5 px-1.5 transition text-sm ${
+              style={{ borderBottom: "1px solid #3A3D44" }}
+              className={`block py-1.5 px-1.5 transition text-sm ${
                 isCurrent
-                  ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-900 border-l-4 border-l-transparent"
+                  ? "bg-blue-900/20 border-l-4 border-l-blue-500"
+                  : "hover:bg-[#282B31] border-l-4 border-l-transparent"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`truncate flex-1 ${
-                  isCurrent
-                    ? "font-bold text-blue-700 dark:text-blue-400"
-                    : isRead
-                      ? "text-gray-400 dark:text-gray-600"
-                      : "text-gray-800 dark:text-gray-200"
-                }`}>
-                  {isCurrent && "▶ "}{p.title}
+                <span
+                  style={{ color: isCurrent ? "#60A5FA" : isRead ? "#78849B" : "#E5E7EB" }}
+                  className={`flex items-center flex-1 min-w-0 ${isCurrent ? "font-bold" : ""}`}
+                >
+                  <span className="truncate">{isCurrent && "▶ "}{p.title}</span>
+                  {p._count.comments > 0 && (
+                    <span style={{ color: "#F59E0B" }} className="ml-1 font-bold shrink-0">[{p._count.comments}]</span>
+                  )}
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 ml-2 shrink-0">
+                <span style={{ color: "#64748B" }} className="flex items-center gap-1.5 text-xs ml-2 shrink-0">
                   <span>{p.author.name}</span>
                   <span className="flex items-center gap-0.5">
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                    <span className="text-[10px]">👍</span>
                     {p._count.likes}
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                    </svg>
-                    {p._count.comments}
                   </span>
                   <span>{formatRelativeTime(p.createdAt)}</span>
                 </span>
@@ -114,14 +109,65 @@ export default function BottomPostList({ posts, currentPostId }: BottomPostListP
           );
         })}
       </div>
-      <div className="mt-1.5 text-center">
-        <Link
-          href="/posts"
-          className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
-        >
-          전체 목록 보기 →
-        </Link>
-      </div>
+      {totalPages > 1 && (() => {
+        const groupSize = 5;
+        const groupStart = Math.floor((currentPostPage - 1) / groupSize) * groupSize + 1;
+        const groupEnd = Math.min(groupStart + groupSize - 1, totalPages);
+        const pages = Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i);
+
+        return (
+          <div className="mt-1.5 flex items-center justify-center gap-1">
+            {groupStart > 1 ? (
+              <Link
+                href={`/posts?page=${groupStart - 1}`}
+                style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+                className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
+              >
+                이전
+              </Link>
+            ) : (
+              <span style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#64748B" }} className="rounded-lg border px-3 py-1.5 text-sm font-medium cursor-not-allowed">
+                이전
+              </span>
+            )}
+
+            {pages.map((p) => (
+              p === currentPostPage ? (
+                <span
+                  key={p}
+                  style={{ backgroundColor: "#3B82F6", color: "#FFFFFF" }}
+                  className="rounded-lg px-3 py-1.5 text-sm font-bold"
+                >
+                  {p}
+                </span>
+              ) : (
+                <Link
+                  key={p}
+                  href={`/posts?page=${p}`}
+                  style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+                  className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
+                >
+                  {p}
+                </Link>
+              )
+            ))}
+
+            {groupEnd < totalPages ? (
+              <Link
+                href={`/posts?page=${groupEnd + 1}`}
+                style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+                className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
+              >
+                다음
+              </Link>
+            ) : (
+              <span style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#64748B" }} className="rounded-lg border px-3 py-1.5 text-sm font-medium cursor-not-allowed">
+                다음
+              </span>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

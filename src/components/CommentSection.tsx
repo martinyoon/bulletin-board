@@ -114,12 +114,12 @@ export default function CommentSection({
 
   return (
     <div className="mt-1">
-      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1 leading-tight">
+      <h3 style={{ color: "#E5E7EB" }} className="text-base font-semibold mb-1 leading-tight">
         댓글 ({totalCount})
       </h3>
 
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 p-1 text-xs text-red-600 dark:text-red-400 border-b border-red-200 dark:border-red-800 mb-0.5 leading-tight">
+        <div style={{ backgroundColor: "rgba(239,68,68,0.1)", borderColor: "#7F1D1D", color: "#F87171" }} className="p-1 text-xs border-b mb-0.5 leading-tight">
           {error}
         </div>
       )}
@@ -127,7 +127,7 @@ export default function CommentSection({
       {/* Comment list */}
       <div className="space-y-0 mb-1">
         {comments.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-xs py-1 leading-tight">
+          <p style={{ color: "#94A3B8" }} className="text-xs py-1 leading-tight">
             아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
           </p>
         ) : (
@@ -154,7 +154,8 @@ export default function CommentSection({
             onFocus={() => window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: true } }))}
             placeholder="댓글을 작성하세요..."
             rows={2}
-            className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-2 py-1 text-xs text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y leading-tight"
+            style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+            className="w-full border px-2 py-1 text-xs placeholder-[#64748B] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y leading-tight"
             disabled={loading}
           />
           <div className="flex justify-end">
@@ -168,9 +169,9 @@ export default function CommentSection({
           </div>
         </form>
       ) : (
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-1 border-b border-dashed border-gray-300 dark:border-gray-600 leading-tight">
+        <p style={{ color: "#94A3B8", borderColor: "#3A3D44" }} className="text-xs text-center py-1 border-b border-dashed leading-tight">
           댓글을 작성하려면{" "}
-          <a href="/login" className="text-blue-600 hover:underline font-medium">
+          <a href="/login" style={{ color: "#60A5FA" }} className="hover:underline font-medium">
             로그인
           </a>
           해주세요.
@@ -219,14 +220,14 @@ function CommentItem({
   const [dislikeParticles, setDislikeParticles] = useState<Particle[]>([]);
   const particleId = useRef(0);
 
-  // 깊이별 세로선 색상
+  // 깊이별 세로선 색상 (블루 계열 단색)
   const borderColors = [
-    "border-blue-400 dark:border-blue-500",
-    "border-green-400 dark:border-green-500",
-    "border-purple-400 dark:border-purple-500",
-    "border-orange-400 dark:border-orange-500",
-    "border-pink-400 dark:border-pink-500",
-    "border-teal-400 dark:border-teal-500",
+    "border-blue-500/50",
+    "border-blue-500/40",
+    "border-blue-500/30",
+    "border-blue-400/25",
+    "border-blue-400/20",
+    "border-blue-400/15",
   ];
 
   const formatDate = (dateString: string) => {
@@ -410,18 +411,18 @@ function CommentItem({
 
   return (
     <div className={depth > 0 ? `ml-3 pl-2 border-l-2 ${borderColors[(depth - 1) % borderColors.length]}` : ""}>
-      <div className="border-b border-gray-200 dark:border-gray-700 p-1">
+      <div style={{ borderBottom: "1px solid #3A3D44" }} className="p-1">
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-1">
             {depth > 0 && (
-              <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+              <span style={{ color: "#64748B" }} className="text-xs font-mono">
                 {"↳"}
               </span>
             )}
-            <span className="text-xs font-semibold text-gray-800 dark:text-gray-200 leading-tight">
+            <span style={{ color: "#E5E7EB" }} className="text-xs font-semibold leading-tight">
               {comment.author.name}
             </span>
-            <span className="text-[11px] text-gray-400 dark:text-gray-500 leading-tight">
+            <span style={{ color: "#64748B" }} className="text-[11px] leading-tight">
               {formatDate(comment.createdAt)}
             </span>
           </div>
@@ -433,7 +434,8 @@ function CommentItem({
                   setShowReplyForm(next);
                   window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: next } }));
                 }}
-                className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition"
+                style={{ color: "#60A5FA" }}
+                className="text-xs hover:opacity-80 transition"
               >
                 {showReplyForm ? "취소" : "답글"}
               </button>
@@ -442,14 +444,15 @@ function CommentItem({
               <button
                 onClick={() => handleDeleteClick(comment.id)}
                 disabled={deletingId === comment.id}
-                className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition disabled:opacity-50"
+                style={{ color: "#F87171" }}
+                className="text-xs hover:opacity-80 transition disabled:opacity-50"
               >
                 {deletingId === comment.id ? "삭제 중..." : "삭제"}
               </button>
             )}
           </div>
         </div>
-        <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-tight">
+        <p style={{ color: "#CBD5E1" }} className="text-xs whitespace-pre-wrap leading-tight">
           {comment.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
             /^https?:\/\//.test(part) ? (
               <a
@@ -457,7 +460,8 @@ function CommentItem({
                 href={part}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                style={{ color: "#60A5FA" }}
+                className="hover:underline break-all"
               >
                 {part}
               </a>
@@ -473,11 +477,8 @@ function CommentItem({
             <button
               onClick={handleLike}
               disabled={voteLoading}
-              className={`inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 ${
-                isLiked
-                  ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400"
-                  : "border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:text-red-400"
-              }`}
+              style={isLiked ? { borderColor: "#7F1D1D", backgroundColor: "rgba(239,68,68,0.1)", color: "#F87171" } : { borderColor: "#3A3D44", color: "#64748B" }}
+              className="inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 hover:text-red-400"
             >
               <svg className="h-3 w-3" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H6.633" />
@@ -491,11 +492,8 @@ function CommentItem({
             <button
               onClick={handleDislike}
               disabled={voteLoading}
-              className={`inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 ${
-                isDisliked
-                  ? "border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400"
-                  : "border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:text-blue-400"
-              }`}
+              style={isDisliked ? { borderColor: "#1E3A5F", backgroundColor: "rgba(59,130,246,0.1)", color: "#60A5FA" } : { borderColor: "#3A3D44", color: "#64748B" }}
+              className="inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 hover:text-blue-400"
             >
               <svg className="h-3 w-3" fill={isDisliked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.367 13.75c-.806 0-1.533.446-2.031 1.08a9.041 9.041 0 0 0-2.861 2.4c-.723.384-1.35.956-1.653 1.715a4.498 4.498 0 0 1-.322 1.672v.633a.75.75 0 0 0-.75.75 2.25 2.25 0 0 0-2.25-2.25c0-1.152.26-2.243.723-3.218.266-.558-.107-1.282-.725-1.282H3.372c-1.026 0-1.945-.694-2.054-1.715A11.95 11.95 0 0 1 1.25 12.25c0-2.848.992-5.464 2.649-7.521.388-.482.987-.729 1.605-.729h4.227c.483 0 .964.078 1.423.23l3.114 1.04c.459.153.94.23 1.423.23h2.27" />
@@ -516,7 +514,8 @@ function CommentItem({
             onChange={(e) => setReplyContent(e.target.value)}
             placeholder={`${comment.author.name}님에게 답글 작성...`}
             rows={2}
-            className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-2 py-1 text-xs text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y leading-tight"
+            style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+            className="w-full border px-2 py-1 text-xs placeholder-[#64748B] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y leading-tight"
             disabled={replyLoading}
           />
           <div className="flex justify-end">

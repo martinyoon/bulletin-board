@@ -3,13 +3,13 @@
 @custom-variant dark (&:where(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #1F2126;
+  --foreground: #CBD5E1;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #1F2126;
+  --foreground: #CBD5E1;
 }
 
 @theme inline {
@@ -31,14 +31,12 @@ body {
   75% { transform: translateX(6px); }
 }
 
-/* 새글 쓰기 버튼 - 부드럽게 천천히 좌우 흔들림 */
 @keyframes fab-sway {
   0%, 100% { transform: translateX(0) rotate(0deg); }
   25% { transform: translateX(-4px) rotate(-1.5deg); }
   75% { transform: translateX(4px) rotate(1.5deg); }
 }
 
-/* 추천 & 비추천 공통 - 사방으로 터짐 */
 @keyframes like-burst {
   0% {
     transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1);

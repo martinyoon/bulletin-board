@@ -12,12 +12,13 @@ export default async function NewPostPage() {
   }
 
   return (
-    <div className="min-h-screen dark:bg-gray-950">
+    <div style={{ backgroundColor: "#1F2126" }} className="min-h-screen">
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Back link */}
         <Link
           href="/posts"
-          className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition mb-1"
+          style={{ color: "#94A3B8" }}
+          className="inline-flex items-center gap-1 text-xs hover:text-blue-400 transition mb-1"
         >
           <svg
             className="h-3.5 w-3.5"
@@ -36,7 +37,7 @@ export default async function NewPostPage() {
         </Link>
 
         <div className="p-2">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1 leading-tight">새 글 작성</h1>
+          <h1 style={{ color: "#E5E7EB" }} className="text-xl font-bold mb-1 leading-tight">새 글 작성</h1>
           <PostForm mode="create" />
         </div>
       </div>

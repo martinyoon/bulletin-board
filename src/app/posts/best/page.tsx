@@ -17,14 +17,8 @@ function formatRelativeTime(dateString: string | Date) {
   return date.toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 }
 
-const AVATAR_COLORS = [
-  "bg-red-500", "bg-blue-500", "bg-green-500", "bg-purple-500",
-  "bg-pink-500", "bg-indigo-500", "bg-teal-500", "bg-orange-500",
-];
-
-function getAvatarColor(name: string) {
-  const code = name.charCodeAt(0) || 0;
-  return AVATAR_COLORS[code % AVATAR_COLORS.length];
+function getAvatarInitial(name: string) {
+  return name[0];
 }
 
 export default async function BestPostListPage({
@@ -68,11 +62,11 @@ export default async function BestPostListPage({
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div style={{ backgroundColor: "#1F2126" }} className="min-h-screen">
       <div className="mx-auto max-w-5xl px-2 py-2">
         {/* Header */}
         <div className="mb-1">
-          <h1 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 leading-tight">베스트글 게시판</h1>
+          <h1 style={{ color: "#60A5FA" }} className="text-2xl font-bold leading-tight">베스트글 게시판</h1>
         </div>
 
         {/* Search bar */}
@@ -83,11 +77,13 @@ export default async function BestPostListPage({
               name="search"
               defaultValue={searchQuery}
               placeholder="베스트글 검색..."
-              className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-2 py-1.5 text-sm text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition leading-tight"
+              style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+              className="flex-1 rounded-lg border px-2 py-1.5 text-sm placeholder-[#64748B] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition leading-tight"
             />
             <button
               type="submit"
-              className="rounded-lg bg-gray-800 dark:bg-gray-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-900 dark:hover:bg-gray-600 transition focus:ring-2 focus:ring-gray-500/20 focus:outline-none"
+              style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+              className="rounded-lg border px-3 py-1.5 text-sm font-semibold hover:opacity-80 transition focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
             >
               검색
             </button>
@@ -98,13 +94,13 @@ export default async function BestPostListPage({
         {posts.length === 0 ? (
           <div className="py-8 text-center">
             <div className="text-5xl mb-2">{searchQuery ? "🔍" : "🔥"}</div>
-            <p className="text-gray-500 dark:text-gray-400 leading-tight">
+            <p style={{ color: "#94A3B8" }} className="leading-tight">
               {searchQuery
                 ? `"${searchQuery}"에 대한 검색 결과가 없습니다.`
                 : "아직 베스트글이 없습니다!"}
             </p>
             {!searchQuery && (
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">추천을 1개 이상 받은 글이 여기에 표시됩니다.</p>
+              <p style={{ color: "#64748B" }} className="text-sm mt-0.5">추천을 1개 이상 받은 글이 여기에 표시됩니다.</p>
             )}
           </div>
         ) : (
@@ -113,38 +109,32 @@ export default async function BestPostListPage({
               <Link
                 key={post.id}
                 href={`/posts/${post.id}`}
-                className="block border-b border-gray-200 dark:border-gray-800 py-1.5 px-1 hover:bg-gray-50 dark:hover:bg-gray-900 transition group relative border-l-4 border-l-transparent hover:border-l-yellow-500"
+                style={{ borderBottom: "1px solid #3A3D44" }}
+                className="block py-1.5 px-1 hover:bg-[#282B31] transition group relative border-l-4 border-l-transparent hover:border-l-blue-500"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition truncate leading-tight">
-                      {post.title}
+                    <h2 style={{ color: "#E5E7EB" }} className="text-lg font-semibold group-hover:text-blue-400 transition leading-tight flex items-center">
+                      <span className="truncate">{post.title}</span>
+                      {post._count.comments > 0 && (
+                        <span style={{ color: "#F59E0B" }} className="ml-1 text-sm font-bold shrink-0">[{post._count.comments}]</span>
+                      )}
                     </h2>
-                    <div className="mt-0.5 flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 leading-tight">
+                    <div style={{ color: "#94A3B8" }} className="mt-0.5 flex items-center gap-1 text-sm leading-tight">
                       <span className="flex items-center gap-1">
-                        <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold text-white ${getAvatarColor(post.author.name)}`}>
-                          {post.author.name[0]}
+                        <span style={{ backgroundColor: "#3A3D44", color: "#CBD5E1" }} className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold">
+                          {getAvatarInitial(post.author.name)}
                         </span>
                         {post.author.name}
                       </span>
                       <span>{formatRelativeTime(post.createdAt)}</span>
                       <span className="flex items-center gap-0.5">
-                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
+                        <span className="text-xs">👍</span>
                         {post._count.likes}
                       </span>
                       <span className="flex items-center gap-0.5">
-                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7.5 15h2.25m8.024-9.75c.011.05.028.1.052.148.591 1.2.924 2.55.924 3.977a8.96 8.96 0 01-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398C20.613 14.547 19.833 15 19 15h-1.053c-.472 0-.745-.556-.5-.96a8.95 8.95 0 00.303-.54m.023-8.25H16.48a4.5 4.5 0 01-1.423-.23l-3.114-1.04a4.5 4.5 0 00-1.423-.23H6.504c-.694 0-1.372.271-1.873.744L3.342 5.65a2.252 2.252 0 00-.083 3.16l.012.013c.104.12.183.258.231.408l.07.222a3.252 3.252 0 002.287 2.282c.2.055.406.092.616.11l.455.04c.512.045.898.476.898.99v2.07a2.25 2.25 0 01-1.5 2.122" />
-                        </svg>
+                        <span className="text-xs">👎</span>
                         {post._count.dislikes}
-                      </span>
-                      <span className="flex items-center gap-0.5">
-                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                        </svg>
-                        {post._count.comments}
                       </span>
                     </div>
                   </div>
@@ -155,39 +145,66 @@ export default async function BestPostListPage({
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-1 flex items-center justify-center gap-1">
-            {currentPage > 1 ? (
-              <Link
-                href={`/posts/best?page=${currentPage - 1}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`}
-                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-              >
-                이전
-              </Link>
-            ) : (
-              <span className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                이전
-              </span>
-            )}
+        {totalPages > 1 && (() => {
+          const groupSize = 5;
+          const groupStart = Math.floor((currentPage - 1) / groupSize) * groupSize + 1;
+          const groupEnd = Math.min(groupStart + groupSize - 1, totalPages);
+          const pages = Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i);
+          const searchSuffix = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
-            <span className="px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400 leading-tight">
-              {currentPage} / {totalPages}
-            </span>
+          return (
+            <div className="mt-1 flex items-center justify-center gap-1">
+              {groupStart > 1 ? (
+                <Link
+                  href={`/posts/best?page=${groupStart - 1}${searchSuffix}`}
+                  style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+                  className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
+                >
+                  이전
+                </Link>
+              ) : (
+                <span style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#64748B" }} className="rounded-lg border px-3 py-1.5 text-sm font-medium cursor-not-allowed">
+                  이전
+                </span>
+              )}
 
-            {currentPage < totalPages ? (
-              <Link
-                href={`/posts/best?page=${currentPage + 1}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`}
-                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-              >
-                다음
-              </Link>
-            ) : (
-              <span className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                다음
-              </span>
-            )}
-          </div>
-        )}
+              {pages.map((p) => (
+                p === currentPage ? (
+                  <span
+                    key={p}
+                    style={{ backgroundColor: "#3B82F6", color: "#FFFFFF" }}
+                    className="rounded-lg px-3 py-1.5 text-sm font-bold"
+                  >
+                    {p}
+                  </span>
+                ) : (
+                  <Link
+                    key={p}
+                    href={`/posts/best?page=${p}${searchSuffix}`}
+                    style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+                    className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
+                  >
+                    {p}
+                  </Link>
+                )
+              ))}
+
+              {groupEnd < totalPages ? (
+                <Link
+                  href={`/posts/best?page=${groupEnd + 1}${searchSuffix}`}
+                  style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+                  className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
+                >
+                  다음
+                </Link>
+              ) : (
+                <span style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#64748B" }} className="rounded-lg border px-3 py-1.5 text-sm font-medium cursor-not-allowed">
+                  다음
+                </span>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

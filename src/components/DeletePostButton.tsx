@@ -39,7 +39,8 @@ export default function DeletePostButton({ postId }: DeletePostButtonProps) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="rounded-lg border border-red-300 dark:border-red-700 px-2 py-1 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 focus:ring-2 focus:ring-red-200 focus:outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{ borderColor: "#7F1D1D", color: "#F87171" }}
+      className="rounded-lg border px-2 py-1 text-sm font-semibold hover:bg-red-900/20 focus:ring-2 focus:ring-red-500/20 focus:outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {loading ? "삭제 중..." : "삭제"}
     </button>

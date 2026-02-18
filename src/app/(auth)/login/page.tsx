@@ -37,9 +37,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950 px-2">
-      <div className="w-full max-w-md bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-2">
-        <h1 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2 leading-tight">
+    <div style={{ backgroundColor: "#1F2126" }} className="min-h-screen flex items-center justify-center px-2">
+      <div style={{ backgroundColor: "#1F2126", borderColor: "#3A3D44" }} className="w-full max-w-md border rounded-lg p-2">
+        <h1 style={{ color: "#E5E7EB" }} className="text-xl font-bold text-center mb-2 leading-tight">
           로그인
         </h1>
 
@@ -47,7 +47,8 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 leading-tight"
+              style={{ color: "#CBD5E1" }}
+              className="block text-sm font-medium mb-1 leading-tight"
             >
               이메일
             </label>
@@ -58,14 +59,16 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="example@email.com"
-              className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 leading-tight"
+              style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+              className="w-full px-2 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-[#64748B] leading-tight"
             />
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 leading-tight"
+              style={{ color: "#CBD5E1" }}
+              className="block text-sm font-medium mb-1 leading-tight"
             >
               비밀번호
             </label>
@@ -76,12 +79,13 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="비밀번호를 입력하세요"
-              className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 placeholder-gray-400 dark:placeholder-gray-500 leading-tight"
+              style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
+              className="w-full px-2 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-[#64748B] leading-tight"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg p-1 border border-red-200 dark:border-red-800 leading-tight">
+            <div style={{ backgroundColor: "rgba(239,68,68,0.1)", borderColor: "#7F1D1D", color: "#F87171" }} className="text-sm rounded-lg p-1 border leading-tight">
               {error}
             </div>
           )}
@@ -95,11 +99,12 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-1 text-center text-sm text-gray-600 dark:text-gray-400 leading-tight">
+        <p style={{ color: "#94A3B8" }} className="mt-1 text-center text-sm leading-tight">
           계정이 없으신가요?{" "}
           <Link
             href="/register"
-            className="text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
+            style={{ color: "#60A5FA" }}
+            className="font-medium hover:text-blue-300 hover:underline"
           >
             회원가입
           </Link>
