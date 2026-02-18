@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 
 interface DeletePostButtonProps {
   postId: string;
+  returnHref?: string;
 }
 
-export default function DeletePostButton({ postId }: DeletePostButtonProps) {
+export default function DeletePostButton({ postId, returnHref = "/posts" }: DeletePostButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +27,7 @@ export default function DeletePostButton({ postId }: DeletePostButtonProps) {
         throw new Error(data.error || "삭제에 실패했습니다.");
       }
 
-      router.push("/posts");
+      router.push(returnHref);
       router.refresh();
     } catch (err) {
       alert(err instanceof Error ? err.message : "오류가 발생했습니다.");

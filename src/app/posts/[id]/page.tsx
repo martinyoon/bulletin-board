@@ -190,7 +190,7 @@ export default async function PostDetailPage({
                   >
                     수정
                   </Link>
-                  <DeletePostButton postId={post.id} />
+                  <DeletePostButton postId={post.id} returnHref={backHref} />
                 </div>
               )}
             </div>
