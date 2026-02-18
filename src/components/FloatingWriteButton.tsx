@@ -132,7 +132,7 @@ export default function FloatingWriteButton() {
   const isFormPage = isNewPostPage || isEditPostPage;
 
   const bgColor = isFormPage ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700";
-  const label = isFormPage ? (isNewPostPage ? "작성 완료" : "수정 완료") : "새글 쓰기";
+  const label = isFormPage ? (isNewPostPage ? "게시판 새글 쓰기 작성 완료" : "수정 완료") : "게시판 새글 쓰기";
   const iconPath = isFormPage ? "M5 13l4 4L19 7" : "M12 4v16m8-8H4";
 
   return (

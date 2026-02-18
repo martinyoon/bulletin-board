@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import CommentSection from "@/components/CommentSection";
 import DeletePostButton from "@/components/DeletePostButton";
 import LikeButton from "@/components/LikeButton";
+import PostContent from "@/components/PostContent";
+import BottomPostList from "@/components/BottomPostList";
 
 export default async function PostDetailPage({
   params,
@@ -24,6 +26,19 @@ export default async function PostDetailPage({
   if (!post) {
     notFound();
   }
+
+  // Fetch post list for bottom section
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 15,
+    select: {
+      id: true,
+      title: true,
+      createdAt: true,
+      author: { select: { name: true } },
+      _count: { select: { comments: true, likes: true } },
+    },
+  });
 
   const isAuthor = session?.user?.id === post.author.id;
 
@@ -122,23 +137,7 @@ export default async function PostDetailPage({
 
           {/* Post body */}
           <div className="prose prose-gray dark:prose-invert max-w-none">
-            <div className="text-gray-800 dark:text-gray-200 leading-tight whitespace-pre-wrap">
-              {post.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-                /^https?:\/\//.test(part) ? (
-                  <a
-                    key={i}
-                    href={part}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline break-all"
-                  >
-                    {part}
-                  </a>
-                ) : (
-                  part
-                )
-              )}
-            </div>
+            <PostContent content={post.content} />
           </div>
 
           {/* Like button */}
@@ -154,6 +153,9 @@ export default async function PostDetailPage({
             currentUserId={session?.user?.id}
           />
         </div>
+
+        {/* Post list at bottom */}
+        <BottomPostList posts={JSON.parse(JSON.stringify(posts))} currentPostId={post.id} />
       </div>
     </div>
   );
