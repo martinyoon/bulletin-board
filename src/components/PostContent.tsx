@@ -14,7 +14,7 @@ export default function PostContent({ content }: PostContentProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [isOverflow, setIsOverflow] = useState(false);
-  const MAX_HEIGHT = 200;
+  const MAX_HEIGHT = 600;
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
