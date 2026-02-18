@@ -10,6 +10,8 @@ export default function Header() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
+  const splashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
@@ -70,11 +72,19 @@ export default function Header() {
   }, [menuOpen]);
 
   return (
+    <>
     <header style={{ backgroundColor: "#1F2126", borderBottom: "1px solid #3A3D44" }} className="sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-2 h-10 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           {/* Board Icon */}
-          <Link href="/posts" className="shrink-0">
+          <button
+            className="shrink-0 cursor-pointer"
+            onClick={() => {
+              if (splashTimer.current) clearTimeout(splashTimer.current);
+              setShowSplash(true);
+              splashTimer.current = setTimeout(() => setShowSplash(false), 1500);
+            }}
+          >
             <img
               src="/board-icon.jpg"
               alt="게시판"
@@ -83,7 +93,7 @@ export default function Header() {
               className="rounded-full"
               style={{ border: "2px solid #3A3D44", objectFit: "cover" }}
             />
-          </Link>
+          </button>
           {/* Menu Icon */}
           <div ref={menuRef} className="relative">
             <button
@@ -241,5 +251,33 @@ export default function Header() {
         </nav>
       </div>
     </header>
+
+      {showSplash && (
+        <>
+          <style>{`
+            @keyframes splash-bounce {
+              0% { transform: scale(0); opacity: 0; }
+              60% { transform: scale(1.1); opacity: 1; }
+              100% { transform: scale(1); opacity: 1; }
+            }
+            @keyframes splash-fade {
+              0% { opacity: 1; }
+              70% { opacity: 1; }
+              100% { opacity: 0; }
+            }
+          `}</style>
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)", animation: "splash-fade 1.5s ease-out forwards" }}
+            onClick={() => { setShowSplash(false); if (splashTimer.current) clearTimeout(splashTimer.current); }}
+          >
+            <img
+              src="/board-icon.jpg"
+              alt="게시판"
+              style={{ width: 200, height: 200, borderRadius: "50%", border: "4px solid #3A3D44", animation: "splash-bounce 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards" }}
+            />
+          </div>
+        </>
+      )}
+    </>
   );
 }
