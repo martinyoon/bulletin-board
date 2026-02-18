@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import AuthorLink from "@/components/AuthorLink";
 
 const RANK_STYLES = [
   { emoji: "\uD83D\uDC51", border: "#60A5FA", bg: "rgba(59,130,246,0.15)" },
@@ -86,7 +87,7 @@ export default async function SuperBestPostListPage() {
                           <span style={{ backgroundColor: "#3A3D44", color: "#CBD5E1" }} className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold">
                             {getAvatarInitial(post.author.name)}
                           </span>
-                          <Link href={`/users/${post.author.id}`} style={{ color: "#94A3B8" }} className="hover:text-blue-400 hover:underline">{post.author.name}</Link>
+                          <AuthorLink href={`/users/${post.author.id}`} style={{ color: "#94A3B8" }} className="hover:text-blue-400 hover:underline">{post.author.name}</AuthorLink>
                         </span>
                         <span>{formatRelativeTime(post.createdAt)}</span>
                         <span className="flex items-center gap-0.5">

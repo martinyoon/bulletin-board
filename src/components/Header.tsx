@@ -17,7 +17,41 @@ export default function Header() {
     { href: "/posts", label: "게시판" },
   ];
 
+  // 게시글 상세 페이지 여부 (/posts/[id] 또는 /posts/[id]/edit)
+  const isPostDetail = pathname.startsWith("/posts/") &&
+    !pathname.startsWith("/posts/best") &&
+    !pathname.startsWith("/posts/super-best") &&
+    !pathname.startsWith("/posts/new");
+
+  // sessionStorage에서 마지막 탭 읽기 (SSR 안전)
+  const [lastTab, setLastTab] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try { return sessionStorage.getItem("last-tab"); } catch { return null; }
+    }
+    return null;
+  });
+
+  // 목록 페이지 방문 시 sessionStorage에 저장
+  useEffect(() => {
+    try {
+      if (pathname === "/posts") {
+        sessionStorage.setItem("last-tab", "/posts");
+        setLastTab("/posts");
+      } else if (pathname.startsWith("/posts/super-best")) {
+        sessionStorage.setItem("last-tab", "/posts/super-best");
+        setLastTab("/posts/super-best");
+      } else if (pathname.startsWith("/posts/best")) {
+        sessionStorage.setItem("last-tab", "/posts/best");
+        setLastTab("/posts/best");
+      }
+    } catch {}
+  }, [pathname]);
+
   function isActive(href: string) {
+    // 게시글 상세에서는 sessionStorage 기반으로 판단
+    if (isPostDetail && lastTab) {
+      return lastTab === href;
+    }
     if (href === "/posts") return pathname === "/posts" || (pathname.startsWith("/posts") && !pathname.startsWith("/posts/best") && !pathname.startsWith("/posts/super-best"));
     return pathname.startsWith(href);
   }
