@@ -27,6 +27,26 @@ function getAvatarInitial(name: string) {
   return name[0];
 }
 
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text: string, query?: string) {
+  if (!query) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${escapeRegex(query)})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={i} style={{ backgroundColor: "rgba(59,130,246,0.3)", color: "#60A5FA" }} className="rounded px-0.5">{part}</mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
 export default async function SuperBestPostListPage({
   searchParams,
 }: {
@@ -127,7 +147,7 @@ export default async function SuperBestPostListPage({
                         <span className="inline-block w-8 text-center mr-1 shrink-0">
                           {rankStyle ? rankStyle.emoji : <span style={{ color: "#64748B" }} className="text-sm">{index + 1}</span>}
                         </span>
-                        <span className="truncate">{post.title}</span>
+                        <span className="truncate">{highlightText(post.title, searchQuery || undefined)}</span>
                         {post._count.comments > 0 && (
                           <span style={{ color: "#F59E0B" }} className="ml-1 text-sm font-bold shrink-0">[{post._count.comments}]</span>
                         )}

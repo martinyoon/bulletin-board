@@ -22,6 +22,7 @@ export default function LikeButton({ postId, isLoggedIn }: LikeButtonProps) {
   const [loading, setLoading] = useState(false);
   const [likeParticles, setLikeParticles] = useState<Particle[]>([]);
   const [dislikeParticles, setDislikeParticles] = useState<Particle[]>([]);
+  const [showLoginMsg, setShowLoginMsg] = useState(false);
   const particleId = useRef(0);
 
   const spawnParticles = () => {
@@ -64,7 +65,8 @@ export default function LikeButton({ postId, isLoggedIn }: LikeButtonProps) {
 
   const handleToggleLike = async () => {
     if (!isLoggedIn) {
-      alert("로그인이 필요합니다.");
+      setShowLoginMsg(true);
+      setTimeout(() => setShowLoginMsg(false), 2500);
       return;
     }
     if (loading) return;
@@ -106,7 +108,8 @@ export default function LikeButton({ postId, isLoggedIn }: LikeButtonProps) {
 
   const handleToggleDislike = async () => {
     if (!isLoggedIn) {
-      alert("로그인이 필요합니다.");
+      setShowLoginMsg(true);
+      setTimeout(() => setShowLoginMsg(false), 2500);
       return;
     }
     if (loading) return;
@@ -147,7 +150,12 @@ export default function LikeButton({ postId, isLoggedIn }: LikeButtonProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
+      {showLoginMsg && (
+        <div style={{ backgroundColor: "rgba(59,130,246,0.15)", borderColor: "#1E3A5F", color: "#60A5FA" }} className="w-full text-xs px-2 py-1.5 rounded border mb-1">
+          <a href="/login" style={{ color: "#60A5FA" }} className="font-bold hover:underline">로그인</a> 후 이용할 수 있습니다.
+        </div>
+      )}
       {/* 추천 버튼 */}
       <div className="relative">
         <button

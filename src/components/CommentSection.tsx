@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface Comment {
   id: string;
@@ -98,8 +99,6 @@ export default function CommentSection({
   };
 
   const handleDelete = async (commentId: string) => {
-    if (!confirm("댓글을 삭제하시겠습니까? 하위 답글도 함께 삭제됩니다.")) return;
-
     try {
       const res = await fetch(
         `/api/posts/${postId}/comments?commentId=${commentId}`,
@@ -221,6 +220,9 @@ function CommentItem({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [contentExpanded, setContentExpanded] = useState(false);
   const [repliesExpanded, setRepliesExpanded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [showLoginMsg, setShowLoginMsg] = useState(false);
   const CONTENT_LIMIT = 150;
 
   // 추천/비추천 상태
@@ -295,7 +297,8 @@ function CommentItem({
 
   const handleLike = async () => {
     if (!currentUserId) {
-      alert("로그인이 필요합니다.");
+      setShowLoginMsg(true);
+      setTimeout(() => setShowLoginMsg(false), 2500);
       return;
     }
     if (voteLoading) return;
@@ -337,7 +340,8 @@ function CommentItem({
 
   const handleDislike = async () => {
     if (!currentUserId) {
-      alert("로그인이 필요합니다.");
+      setShowLoginMsg(true);
+      setTimeout(() => setShowLoginMsg(false), 2500);
       return;
     }
     if (voteLoading) return;
@@ -395,12 +399,20 @@ function CommentItem({
     }
   };
 
-  const handleDeleteClick = async (id: string) => {
-    setDeletingId(id);
+  const handleDeleteClick = (id: string) => {
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    setShowDeleteConfirm(false);
+    setDeletingId(pendingDeleteId);
     try {
-      await onDelete(id);
+      await onDelete(pendingDeleteId);
     } finally {
       setDeletingId(null);
+      setPendingDeleteId(null);
     }
   };
 
@@ -449,7 +461,7 @@ function CommentItem({
                   window.dispatchEvent(new CustomEvent("comment-form-toggle", { detail: { open: next } }));
                 }}
                 style={{ color: "#60A5FA" }}
-                className="text-xs hover:opacity-80 transition"
+                className="text-xs hover:opacity-80 transition px-2 py-1 min-h-[36px]"
               >
                 {showReplyForm ? "취소" : "답글"}
               </button>
@@ -459,7 +471,7 @@ function CommentItem({
                 onClick={() => handleDeleteClick(comment.id)}
                 disabled={deletingId === comment.id}
                 style={{ color: "#F87171" }}
-                className="text-xs hover:opacity-80 transition disabled:opacity-50"
+                className="text-xs hover:opacity-80 transition disabled:opacity-50 px-2 py-1 min-h-[36px]"
               >
                 {deletingId === comment.id ? "삭제 중..." : "삭제"}
               </button>
@@ -506,6 +518,12 @@ function CommentItem({
           })()}
         </p>
 
+        {showLoginMsg && (
+          <div style={{ backgroundColor: "rgba(59,130,246,0.15)", borderColor: "#1E3A5F", color: "#60A5FA" }} className="text-[11px] px-1.5 py-1 rounded border mt-0.5">
+            <a href="/login" style={{ color: "#60A5FA" }} className="font-bold hover:underline">로그인</a> 후 이용할 수 있습니다.
+          </div>
+        )}
+
         {/* 댓글 추천/비추천 버튼 */}
         <div className="flex items-center gap-1.5 mt-1">
           <div className="relative">
@@ -513,7 +531,7 @@ function CommentItem({
               onClick={handleLike}
               disabled={voteLoading}
               style={isLiked ? { borderColor: "#7F1D1D", backgroundColor: "rgba(239,68,68,0.1)", color: "#F87171" } : { borderColor: "#3A3D44", color: "#64748B" }}
-              className="inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 hover:text-red-400"
+              className="inline-flex items-center gap-0.5 text-[11px] px-2 py-1.5 rounded border transition disabled:opacity-50 hover:text-red-400"
             >
               <svg className="h-3 w-3" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H6.633" />
@@ -528,7 +546,7 @@ function CommentItem({
               onClick={handleDislike}
               disabled={voteLoading}
               style={isDisliked ? { borderColor: "#1E3A5F", backgroundColor: "rgba(59,130,246,0.1)", color: "#60A5FA" } : { borderColor: "#3A3D44", color: "#64748B" }}
-              className="inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded border transition disabled:opacity-50 hover:text-blue-400"
+              className="inline-flex items-center gap-0.5 text-[11px] px-2 py-1.5 rounded border transition disabled:opacity-50 hover:text-blue-400"
             >
               <svg className="h-3 w-3" fill={isDisliked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.367 13.75c-.806 0-1.533.446-2.031 1.08a9.041 9.041 0 0 0-2.861 2.4c-.723.384-1.35.956-1.653 1.715a4.498 4.498 0 0 1-.322 1.672v.633a.75.75 0 0 0-.75.75 2.25 2.25 0 0 0-2.25-2.25c0-1.152.26-2.243.723-3.218.266-.558-.107-1.282-.725-1.282H3.372c-1.026 0-1.945-.694-2.054-1.715A11.95 11.95 0 0 1 1.25 12.25c0-2.848.992-5.464 2.649-7.521.388-.482.987-.729 1.605-.729h4.227c.483 0 .964.078 1.423.23l3.114 1.04c.459.153.94.23 1.423.23h2.27" />
@@ -564,6 +582,17 @@ function CommentItem({
           </div>
         </form>
       )}
+
+      <ConfirmModal
+        open={showDeleteConfirm}
+        title="댓글 삭제"
+        message="댓글을 삭제하시겠습니까? 하위 답글도 함께 삭제됩니다."
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => { setShowDeleteConfirm(false); setPendingDeleteId(null); }}
+        danger
+      />
 
       {/* Nested replies (recursive) */}
       {comment.replies && comment.replies.length > 0 && (() => {

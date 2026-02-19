@@ -15,6 +15,27 @@ interface PostItem {
 interface ReadAwarePostListProps {
   posts: PostItem[];
   currentPage?: number;
+  searchQuery?: string;
+}
+
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text: string, query?: string) {
+  if (!query) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${escapeRegex(query)})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={i} style={{ backgroundColor: "rgba(59,130,246,0.3)", color: "#60A5FA" }} className="rounded px-0.5">{part}</mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
 }
 
 function formatRelativeTime(dateString: string | Date) {
@@ -40,7 +61,7 @@ function getReadPosts(): Set<string> {
   }
 }
 
-export default function ReadAwarePostList({ posts, currentPage }: ReadAwarePostListProps) {
+export default function ReadAwarePostList({ posts, currentPage, searchQuery }: ReadAwarePostListProps) {
   const [readPosts, setReadPosts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -65,7 +86,7 @@ export default function ReadAwarePostList({ posts, currentPage }: ReadAwarePostL
                   style={{ color: isRead ? "#78849B" : "#E5E7EB" }}
                   className="text-lg font-semibold group-hover:text-blue-400 transition leading-tight flex items-center"
                 >
-                  <span className="truncate">{post.title}</span>
+                  <span className="truncate">{highlightText(post.title, searchQuery)}</span>
                   {post._count.comments > 0 && (
                     <span style={{ color: "#F59E0B" }} className="ml-1 text-sm font-bold shrink-0">[{post._count.comments}]</span>
                   )}

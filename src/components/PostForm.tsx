@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface PostFormProps {
   initialTitle?: string;
@@ -21,6 +22,23 @@ export default function PostForm({
   const [content, setContent] = useState(initialContent);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+
+  const isDirty = title !== initialTitle || content !== initialContent;
+
+  const handleBeforeUnload = useCallback(
+    (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+      }
+    },
+    [isDirty]
+  );
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [handleBeforeUnload]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +131,13 @@ export default function PostForm({
       <div className="flex items-center gap-1">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (isDirty) {
+              setShowLeaveConfirm(true);
+            } else {
+              router.back();
+            }
+          }}
           disabled={loading}
           style={{ borderColor: "#3A3D44", color: "#CBD5E1" }}
           className="border px-3 py-1.5 text-xs font-semibold hover:bg-[#282B31] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition disabled:opacity-50"
@@ -121,6 +145,16 @@ export default function PostForm({
           취소
         </button>
       </div>
+      <ConfirmModal
+        open={showLeaveConfirm}
+        title="작성 중인 내용이 있습니다"
+        message="페이지를 떠나면 작성 중인 내용이 사라집니다. 정말 나가시겠습니까?"
+        confirmText="나가기"
+        cancelText="계속 작성"
+        onConfirm={() => { setShowLeaveConfirm(false); router.back(); }}
+        onCancel={() => setShowLeaveConfirm(false)}
+        danger
+      />
     </form>
   );
 }

@@ -6,14 +6,15 @@ import ReadAwarePostList from "@/components/ReadAwarePostList";
 export default async function PostListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; search?: string }>;
+  searchParams: Promise<{ page?: string; search?: string; sort?: string }>;
 }) {
-  const { page, search } = await searchParams;
+  const { page, search, sort } = await searchParams;
   const session = await auth();
 
   const currentPage = Math.max(1, parseInt(page || "1", 10));
   const pageSize = 10;
   const searchQuery = (search || "").trim();
+  const sortBy = sort || "latest";
 
   const where = searchQuery
     ? {
@@ -24,13 +25,20 @@ export default async function PostListPage({
       }
     : {};
 
+  const orderBy =
+    sortBy === "likes"
+      ? { likes: { _count: "desc" as const } }
+      : sortBy === "comments"
+        ? { comments: { _count: "desc" as const } }
+        : { createdAt: "desc" as const };
+
   const [totalCount, posts] = await Promise.all([
     prisma.post.count({ where }),
     prisma.post.findMany({
       where,
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
-      orderBy: { createdAt: "desc" as const },
+      orderBy,
       include: {
         author: { select: { id: true, name: true } },
         _count: { select: { comments: true, likes: true, dislikes: true } },
@@ -70,6 +78,33 @@ export default async function PostListPage({
         </form>
         <p style={{ color: "#64748B" }} className="text-xs mb-1 leading-tight">💡 ↑↓ 키로 이전 검색어를 불러올 수 있어요</p>
 
+        {/* Sort buttons */}
+        <div className="flex items-center gap-1 mb-1">
+          {[
+            { key: "latest", label: "최신순" },
+            { key: "likes", label: "추천순" },
+            { key: "comments", label: "댓글순" },
+          ].map((s) => {
+            const isActive = sortBy === s.key;
+            const sortSuffix = s.key === "latest" ? "" : `&sort=${s.key}`;
+            const searchSuffix = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+            return (
+              <Link
+                key={s.key}
+                href={`/posts?page=1${sortSuffix}${searchSuffix}`}
+                style={
+                  isActive
+                    ? { backgroundColor: "#3B82F6", color: "#FFFFFF" }
+                    : { backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#94A3B8" }
+                }
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${isActive ? "" : "border hover:opacity-80"}`}
+              >
+                {s.label}
+              </Link>
+            );
+          })}
+        </div>
+
         {/* Post list */}
         {posts.length === 0 ? (
           <div className="py-8 text-center">
@@ -86,7 +121,7 @@ export default async function PostListPage({
             </p>
           </div>
         ) : (
-          <ReadAwarePostList posts={JSON.parse(JSON.stringify(posts))} currentPage={currentPage} />
+          <ReadAwarePostList posts={JSON.parse(JSON.stringify(posts))} currentPage={currentPage} searchQuery={searchQuery || undefined} />
         )}
 
         {/* Pagination */}
@@ -96,12 +131,13 @@ export default async function PostListPage({
           const groupEnd = Math.min(groupStart + groupSize - 1, totalPages);
           const pages = Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i);
           const searchSuffix = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+          const sortSuffix = sortBy !== "latest" ? `&sort=${sortBy}` : "";
 
           return (
             <div className="mt-1 flex items-center justify-center gap-1">
               {groupStart > 1 ? (
                 <Link
-                  href={`/posts?page=${groupStart - 1}${searchSuffix}`}
+                  href={`/posts?page=${groupStart - 1}${searchSuffix}${sortSuffix}`}
                   style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
                   className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
                 >
@@ -125,7 +161,7 @@ export default async function PostListPage({
                 ) : (
                   <Link
                     key={p}
-                    href={`/posts?page=${p}${searchSuffix}`}
+                    href={`/posts?page=${p}${searchSuffix}${sortSuffix}`}
                     style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
                     className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
                   >
@@ -136,7 +172,7 @@ export default async function PostListPage({
 
               {groupEnd < totalPages ? (
                 <Link
-                  href={`/posts?page=${groupEnd + 1}${searchSuffix}`}
+                  href={`/posts?page=${groupEnd + 1}${searchSuffix}${sortSuffix}`}
                   style={{ backgroundColor: "#282B31", borderColor: "#3A3D44", color: "#CBD5E1" }}
                   className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:opacity-80 transition"
                 >
